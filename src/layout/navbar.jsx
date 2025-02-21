@@ -14,7 +14,7 @@ const Navbar = () => {
 
   return (
     <div className="sticky top-0 z-50 bg-black">
-      <div className="md:h-18 mx-auto flex h-14 w-full max-w-[1500px] items-center justify-between px-4 py-4 text-white md:px-6 md:py-6 lg:h-14 lg:px-8 lg:py-8">
+      <div className="md:h-18 mx-auto flex h-14 w-full max-w-[1500px] items-center justify-between px-4 py-4 text-white md:px-6 md:py-6 lg:h-18 lg:px-8 lg:py-8">
         <div className="flex">
           <img
             src={Logo}
@@ -53,7 +53,12 @@ const Navbar = () => {
         </ul>
 
         <div ref={ref} className="z-50 lg:hidden">
-          <Hamburger toggled={isNavOpen} size={20} color="#c5ac5a" toggle={setIsNavOpen} />
+          <Hamburger
+            toggled={isNavOpen}
+            size={20}
+            color="#c5ac5a"
+            toggle={setIsNavOpen}
+          />
 
           <AnimatePresence>
             {isNavOpen && (

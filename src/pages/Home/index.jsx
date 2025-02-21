@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import SectionOne from "./Section-one";
+import SectionTwo from "./Section-two";
 
 const HomePage = () => {
   useEffect(() => {
@@ -8,6 +9,7 @@ const HomePage = () => {
   return (
     <div>
       <SectionOne />
+      <SectionTwo />
     </div>
   );
 };
