@@ -1,16 +1,23 @@
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone } from "lucide-react"
-
-import Logo from "../assets/icons/spot.svg"
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube,
+  Mail,
+  Phone,
+} from "lucide-react";
+import { Routes } from "../Links/routes";
+import Logo from "../assets/icons/spot.svg";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   const socialLinks = [
     { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
     { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
     { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
     { icon: Youtube, href: "https://youtube.com", label: "Youtube" },
-  ]
+  ];
 
   return (
     <footer className="bg-black text-white py-12">
@@ -26,7 +33,8 @@ const Footer = () => {
               className="h-16 w-auto md:h-20 lg:h-24"
             />
             <p className="text-gray-300 mt-4">
-              Experience the magic of live performances at Spotlight Concert. Where every moment becomes a memory.
+              Experience the magic of live performances at Spotlight Concert.
+              Where every moment becomes a memory.
             </p>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
@@ -35,7 +43,10 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <Mail size={18} className="text-[#c5ac5a]" />
-                <a href="mailto:info@spotlightconcert.com" className="hover:text-[#c5ac5a] transition-colors">
+                <a
+                  href="mailto:info@spotlightconcert.com"
+                  className="hover:text-[#c5ac5a] transition-colors"
+                >
                   info@spotlightconcert.com
                 </a>
               </div>
@@ -46,13 +57,13 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-6">Quick Links</h4>
             <ul className="space-y-3">
-              {["Home", "About Us", "Upcoming Events", "Photo Gallery", "Contact Us"].map((link, index) => (
+              {Routes.map((route, index) => (
                 <li key={index}>
                   <a
-                    href={`/${link.toLowerCase().replace(" ", "-")}`}
+                    href={route.href}
                     className="hover:text-[#c5ac5a] transition-colors flex items-center space-x-2"
                   >
-                    <span>{link}</span>
+                    <span className="">{route.title}</span>
                   </a>
                 </li>
               ))}
@@ -74,12 +85,20 @@ const Footer = () => {
                   date: "April 5-7, 2025 | All Day",
                   featuring: "3 Days of Non-Stop Music",
                 },
-                { title: "Acoustic Unplugged", date: "April 20, 2025 | 8:30 PM", featuring: "With Sarah Mitchell" },
+                {
+                  title: "Acoustic Unplugged",
+                  date: "April 20, 2025 | 8:30 PM",
+                  featuring: "With Sarah Mitchell",
+                },
               ].map((event, index) => (
                 <div key={index} className="group cursor-pointer">
-                  <h5 className="text-[#c5ac5a] group-hover:text-white transition-colors font-medium">{event.title}</h5>
+                  <h5 className="text-[#c5ac5a] group-hover:text-white transition-colors font-medium">
+                    {event.title}
+                  </h5>
                   <p className="text-sm text-gray-400">{event.date}</p>
-                  <p className="text-xs text-gray-500 mt-1">{event.featuring}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {event.featuring}
+                  </p>
                 </div>
               ))}
             </div>
@@ -97,8 +116,13 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   className="flex items-center space-x-3 hover:text-[#c5ac5a] transition-colors group"
                 >
-                  <link.icon size={24} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-gray-300 group-hover:text-[#c5ac5a]">{link.label}</span>
+                  <link.icon
+                    size={24}
+                    className="group-hover:scale-110 transition-transform"
+                  />
+                  <span className="text-gray-300 group-hover:text-[#c5ac5a]">
+                    {link.label}
+                  </span>
                 </a>
               ))}
             </div>
@@ -107,12 +131,13 @@ const Footer = () => {
 
         {/* Copyright Section */}
         <div className="mt-12 pt-8 border-t border-gray-700 text-center">
-          <p className="text-sm text-gray-400">&copy; {currentYear} Spotlight Concert. All rights reserved.</p>
+          <p className="text-sm text-gray-400">
+            &copy; {currentYear} Spotlight Concert. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
-
+export default Footer;
