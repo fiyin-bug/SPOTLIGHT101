@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
-import { Music, Mic, Users, Calendar } from 'lucide-react'
+import { Music, Mic, CirclePlay, Calendar } from 'lucide-react'
 
 const SectionTwo = () => {
   const containerVariants = {
@@ -73,9 +73,9 @@ const SectionTwo = () => {
           </motion.div>
 
           <motion.div className="flex flex-col items-center text-center" variants={itemVariants}>
-            <BouncingIcon icon={Users} className="w-16 h-16 mb-4 text-[#c5ac5a]" />
-            <h3 className="text-2xl font-semibold mb-2">Interactive Experience</h3>
-            <p>Engage with artists and fellow fans in unique ways.</p>
+            <BouncingIcon icon={CirclePlay} className="w-16 h-16 mb-4 text-[#c5ac5a]" />
+            <h3 className="text-2xl font-semibold mb-2">Past Events</h3>
+            <p>Take a dive into highlights from our past events.</p>
           </motion.div>
 
           <motion.div className="flex flex-col items-center text-center" variants={itemVariants}>
