@@ -55,8 +55,8 @@ const SectionTwo = () => {
         </motion.h2>
 
         <motion.p className="text-xl mb-12 text-center max-w-3xl mx-auto" variants={itemVariants}>
-        Spotlight concert and awards was founded 4 years ago with the vision of giving upcoming artistes a spot in the limelight to prove themselves.Asides the competition, the regular concert goers have a blast vibing to hits from mainstream artistes, some of who have graced our stage are, The Late MOBHAD, ASAKE, SEYI VIBEZ, T-CLASSIC, DJ CONSEQUENCE, DJ NEPTUNE, DJ DS
-        Asides the competition, the regular concert goers have a blast vibing. Lagos get ready to rave !!!!
+        Spotlight concert and awards was founded 4 years ago with the vision of giving upcoming artistes a spot in the limelight to prove themselves.Asides the competition, the regular concert goers have a blast vibing to hits from mainstream artistes, some of who have graced our stage are, The Late MOBHAD, ASAKE, SEYI VIBEZ, T-CLASSIC, DJ CONSEQUENCE, DJ NEPTUNE, DJ DSF
+       . Lagos get ready to rave !!!!
               
         </motion.p>
 

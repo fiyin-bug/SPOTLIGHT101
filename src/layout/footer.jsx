@@ -76,7 +76,7 @@ const Footer = () => {
             <div className="space-y-4">
               {[
                 {
-                  title: "Spotlight The Prstige Experience",
+                  title: "Spotlight The Prestige Experience",
                   date: "April 18th, 2025 | 4:00 PM -12:00 AM",
                   featuring: "Featuring Global Talents",
                 },
