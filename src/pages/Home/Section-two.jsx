@@ -55,8 +55,9 @@ const SectionTwo = () => {
         </motion.h2>
 
         <motion.p className="text-xl mb-12 text-center max-w-3xl mx-auto" variants={itemVariants}>
-          Experience the magic of music like never before. Spotlight Concert brings together world-class artists and
-          cutting-edge technology for an unforgettable night of entertainment.
+        Spotlight concert and awards was founded 4 years ago with the vision of giving upcoming artistes a spot in the limelight to prove themselves.Asides the competition, the regular concert goers have a blast vibing to hits from mainstream artistes, some of who have graced our stage are, The Late MOBHAD, ASAKE, SEYI VIBEZ, T-CLASSIC, DJ CONSEQUENCE, DJ NEPTUNE, DJ DS
+        Asides the competition, the regular concert goers have a blast vibing. Lagos get ready to rave !!!!
+              
         </motion.p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
