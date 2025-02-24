@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import SectionOne from "./Section-one";
 import SectionTwo from "./Section-two";
+import SectionThree from "./Section-three";
 
 const HomePage = () => {
   useEffect(() => {
@@ -10,6 +11,7 @@ const HomePage = () => {
     <div>
       <SectionOne />
       <SectionTwo />
+      <SectionThree />
     </div>
   );
 };

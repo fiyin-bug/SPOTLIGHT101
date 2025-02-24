@@ -1,11 +1,4 @@
-import {
-
-  
-  Instagram,
-  Youtube,
-  Mail,
-  Phone,
-} from "lucide-react";
+import { Instagram, Youtube, Mail, Phone } from "lucide-react";
 import { Routes } from "../Links/routes";
 import Logo from "../assets/icons/spot.svg";
 
@@ -13,15 +6,21 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-   
-    
-    { icon: Instagram, href: "https://www.instagram.com/spotlightconcert", label: "Instagram" },
-    { icon: Youtube, href: "https://m.youtube.com/channel/UCULK59kxjq1jpcP6Y2u3jCg", label: "Youtube" },
+    {
+      icon: Instagram,
+      href: "https://www.instagram.com/spotlightconcert",
+      label: "Instagram",
+    },
+    {
+      icon: Youtube,
+      href: "https://m.youtube.com/channel/UCULK59kxjq1jpcP6Y2u3jCg",
+      label: "Youtube",
+    },
   ];
 
   return (
     <footer className="bg-black text-white py-12">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full">
+      <div className="container mx-auto px-4 md:px-6 lg:px-16 w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Company Info Section */}
           <div className="space-y-4">
@@ -85,7 +84,6 @@ const Footer = () => {
                   date: "Unavilable",
                   featuring: "Feaaturing Global Talents",
                 },
-                
               ].map((event, index) => (
                 <div key={index} className="group cursor-pointer">
                   <h5 className="text-[#c5ac5a] group-hover:text-white transition-colors font-medium">
