@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
-import { Music, Mic, Users, Calendar } from 'lucide-react'
+import { Music, Mic, CirclePlay, Calendar } from 'lucide-react'
 
 const SectionTwo = () => {
   const containerVariants = {
@@ -55,8 +55,9 @@ const SectionTwo = () => {
         </motion.h2>
 
         <motion.p className="text-xl mb-12 text-center max-w-3xl mx-auto" variants={itemVariants}>
-          Experience the magic of music like never before. Spotlight Concert brings together world-class artists and
-          cutting-edge technology for an unforgettable night of entertainment.
+        Spotlight concert and awards was founded 4 years ago with the vision of giving upcoming artistes a spot in the limelight to prove themselves.Asides the competition, the regular concert goers have a blast vibing to hits from mainstream artistes, some of who have graced our stage are, The Late MOBHAD, ASAKE, SEYI VIBEZ, T-CLASSIC, DJ CONSEQUENCE, DJ NEPTUNE, DJ DSF
+       . Lagos get ready to rave !!!!
+              
         </motion.p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -73,9 +74,9 @@ const SectionTwo = () => {
           </motion.div>
 
           <motion.div className="flex flex-col items-center text-center" variants={itemVariants}>
-            <BouncingIcon icon={Users} className="w-16 h-16 mb-4 text-[#c5ac5a]" />
-            <h3 className="text-2xl font-semibold mb-2">Interactive Experience</h3>
-            <p>Engage with artists and fellow fans in unique ways.</p>
+            <BouncingIcon icon={CirclePlay} className="w-16 h-16 mb-4 text-[#c5ac5a]" />
+            <h3 className="text-2xl font-semibold mb-2">Past Events</h3>
+            <p>Take a dive into highlights from our past events.</p>
           </motion.div>
 
           <motion.div className="flex flex-col items-center text-center" variants={itemVariants}>

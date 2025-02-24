@@ -1,6 +1,6 @@
 import {
-  Facebook,
-  Twitter,
+
+  
   Instagram,
   Youtube,
   Mail,
@@ -13,10 +13,10 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
-    { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-    { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
-    { icon: Youtube, href: "https://youtube.com", label: "Youtube" },
+   
+    
+    { icon: Instagram, href: "https://www.instagram.com/spotlightconcert", label: "Instagram" },
+    { icon: Youtube, href: "https://m.youtube.com/channel/UCULK59kxjq1jpcP6Y2u3jCg", label: "Youtube" },
   ];
 
   return (
@@ -39,15 +39,15 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <Phone size={18} className="text-[#c5ac5a]" />
-                <span>+1 (555) 123-4567</span>
+                <span>+2349012518521</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail size={18} className="text-[#c5ac5a]" />
                 <a
-                  href="mailto:info@spotlightconcert.com"
+                  href="asanbemusic@gmail.com"
                   className="hover:text-[#c5ac5a] transition-colors"
                 >
-                  info@spotlightconcert.com
+                  asanbemusic@gmail.com
                 </a>
               </div>
             </div>
@@ -76,20 +76,16 @@ const Footer = () => {
             <div className="space-y-4">
               {[
                 {
-                  title: "Rock Revolution Night",
-                  date: "March 15, 2025 | 7:00 PM",
-                  featuring: "Featuring The Electric Waves",
+                  title: "Spotlight The Prestige Experience",
+                  date: "April 18th, 2025 | 4:00 PM -12:00 AM",
+                  featuring: "Featuring Global Talents",
                 },
                 {
-                  title: "Spring Music Festival",
-                  date: "April 5-7, 2025 | All Day",
-                  featuring: "3 Days of Non-Stop Music",
+                  title: "The Sixth Edition",
+                  date: "Unavilable",
+                  featuring: "Feaaturing Global Talents",
                 },
-                {
-                  title: "Acoustic Unplugged",
-                  date: "April 20, 2025 | 8:30 PM",
-                  featuring: "With Sarah Mitchell",
-                },
+                
               ].map((event, index) => (
                 <div key={index} className="group cursor-pointer">
                   <h5 className="text-[#c5ac5a] group-hover:text-white transition-colors font-medium">
