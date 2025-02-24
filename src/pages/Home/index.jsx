@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import SectionOne from "./Section-one";
 import SectionTwo from "./Section-two";
 import SectionThree from "./Section-three";
+import SectionFour from "./Section-four";
 
 const HomePage = () => {
   useEffect(() => {
@@ -12,6 +13,7 @@ const HomePage = () => {
       <SectionOne />
       <SectionTwo />
       <SectionThree />
+      <SectionFour />
     </div>
   );
 };
