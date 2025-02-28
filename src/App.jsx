@@ -12,7 +12,7 @@ import AboutPage from "./pages/AboutUs";
 import TicketPage from "./pages/Tickets";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
-import Checkout from "./pages/Checkout"; // Fixed import (removed trailing slash)
+import Checkout from "./pages/Checkout"; 
 
 function App() {
   const router = createBrowserRouter(

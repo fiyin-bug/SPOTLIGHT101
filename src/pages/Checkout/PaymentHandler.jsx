@@ -59,7 +59,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount }) {
       // Initialize Paystack transaction
       const paystack = new PaystackPop();
       paystack.newTransaction({
-        key: 'pk_live_9fdf47f626da3db16775f593a57baa26078d859d', // Use correct Paystack public key
+        key: 'pk_live_9fdf47f626da3db16775f593a57baa26078d859d', 
         email: contactDetails.email,
         amount: amountInKobo,
         currency: 'NGN',
