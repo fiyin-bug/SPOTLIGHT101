@@ -2,3 +2,6 @@
 @theme {
   --font-display: "Lato", "sans-serif"; 
 }
+.body{
+  background-color:black;
+}

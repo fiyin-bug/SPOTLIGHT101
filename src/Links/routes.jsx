@@ -8,7 +8,7 @@ export const Routes = [
     title: "About Us",
   },
   {
-    href: "/ticket",
+    href: "/tickets",
     title: "Tickets",
   },
   {

@@ -1,77 +1,172 @@
+// src/pages/Checkout/TicketSelector.jsx
 import React from 'react';
 
 function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onBack, onContinue }) {
-  const { earlyBirdCount, regularCount, vipSoloCount, vipTable5Count, vipTable7Count, vipTable10Count } = ticketCounts;
-  const { setEarlyBirdCount, setRegularCount, setVipSoloCount, setVipTable5Count, setVipTable7Count, setVipTable10Count } = setTicketCounts;
-
   const formatPrice = (price) => price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+ 
+  const handleIncrement = (key) => {
+    console.log(`Incrementing ${key} from ${ticketCounts[key]}`);
+    setTicketCounts((prevCounts) => ({
+      ...prevCounts,
+      [key]: prevCounts[key] + 1,
+    }));
+    console.log(`New ${key} value: ${ticketCounts[key] + 1}`);
+  };
+
+  const handleDecrement = (key) => {
+    console.log(`Decrementing ${key} from ${ticketCounts[key]}`);
+    const newCount = Math.max(0, ticketCounts[key] - 1);
+    setTicketCounts((prevCounts) => ({
+      ...prevCounts,
+      [key]: newCount,
+    }));
+    console.log(`New ${key} value: ${newCount}`);
+  };
+
   return (
-    <>
-      <button className="back-btn" onClick={onBack}>Back</button>
-      <p className="Choose-text">CHOOSE TICKET</p>
-      <div className="ticket-option">
-        <p className="choose-ticket">REGULAR TICKET(EARLY BIRD)</p>
-        <p>₦{formatPrice(ticketPrices.earlyBird)}</p>
-        <div className="counter">
-          <button className="decrementor" onClick={() => setEarlyBirdCount(Math.max(0, earlyBirdCount - 1))}>-</button>
-          <span>{earlyBirdCount}</span>
-          <button className="incrementor" onClick={() => setEarlyBirdCount(earlyBirdCount + 1)}>+</button>
+    <div className="bg-black">
+      <button
+        className="mb-4 px-4 py-2 sm:px-6 sm:py-3 border-2 border-gold rounded bg-black text-white text-sm sm:text-base cursor-pointer hover:bg-gold"
+        onClick={onBack}
+      >
+        Back
+      </button>
+      <p className="mb-4 sm:mb-6 text-lg sm:text-xl text-white">CHOOSE TICKET</p>
+
+      {/* Early Bird */}
+      <div className="mb-4 sm:mb-6">
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">REGULAR TICKET (EARLY BIRD)</p>
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">₦{formatPrice(ticketPrices.earlyBird)}</p>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleDecrement('earlyBirdCount')}
+          >
+            -
+          </button>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.earlyBirdCount}</span>
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleIncrement('earlyBirdCount')}
+          >
+            +
+          </button>
         </div>
       </div>
-      <div className="divider"></div>
-      <div className="ticket-option">
-        <p className="Choose-reg">REGULAR TICKETS</p>
-        <p>₦{formatPrice(ticketPrices.regular)}</p>
-        <div className="counter">
-          <button className="decrementor2" disabled onClick={() => setRegularCount(Math.max(0, regularCount - 1))}>-</button>
-          <span>{regularCount}</span>
-          <button className="incrementor2" disabled onClick={() => setRegularCount(regularCount + 1)}>+</button>
+
+      {/* Regular Tickets */}
+      <div className="mb-4 sm:mb-6">
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-gray-500">REGULAR TICKETS</p>
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">₦{formatPrice(ticketPrices.regular)}</p>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base cursor-not-allowed"
+            disabled
+          >
+            -
+          </button>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.regularCount}</span>
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base cursor-not-allowed"
+            disabled
+          >
+            +
+          </button>
         </div>
       </div>
-      <div className="divider"></div>
-      <div className="ticket-option">
-        <p className="Choose-vip6">VIP SOLO</p>
-        <p>₦{formatPrice(ticketPrices.vipSolo)}</p>
-        <div className="counter">
-          <button className="decrementor3" onClick={() => setVipSoloCount(Math.max(0, vipSoloCount - 1))}>-</button>
-          <span>{vipSoloCount}</span>
-          <button className="incrementor3" onClick={() => setVipSoloCount(vipSoloCount + 1)}>+</button>
+
+      {/* VIP Solo */}
+      <div className="mb-4 sm:mb-6">
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">VIP SOLO</p>
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">₦{formatPrice(ticketPrices.vipSolo)}</p>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleDecrement('vipSoloCount')}
+          >
+            -
+          </button>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipSoloCount}</span>
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleIncrement('vipSoloCount')}
+          >
+            +
+          </button>
         </div>
       </div>
-      <div className="divider"></div>
-      <div className="ticket-option">
-        <p className="Choose-vip6">VIP TABLE OF 5</p>
-        <p>₦{formatPrice(ticketPrices.vipTable5)}</p>
-        <div className="counter">
-          <button className="decrementor3" onClick={() => setVipTable5Count(Math.max(0, vipTable5Count - 1))}>-</button>
-          <span>{vipTable5Count}</span>
-          <button className="incrementor3" onClick={() => setVipTable5Count(vipTable5Count + 1)}>+</button>
+
+      {/* VIP Table of 5 */}
+      <div className="mb-4 sm:mb-6">
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">VIP TABLE OF 5</p>
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">₦{formatPrice(ticketPrices.vipTable5)}</p>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleDecrement('vipTable5Count')}
+          >
+            -
+          </button>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable5Count}</span>
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleIncrement('vipTable5Count')}
+          >
+            +
+          </button>
         </div>
       </div>
-      <div className="divider"></div>
-      <div className="ticket-option">
-        <p className="Choose-vip6">VIP TABLE OF 7</p>
-        <p>₦{formatPrice(ticketPrices.vipTable7)}</p>
-        <div className="counter">
-          <button className="decrementor3" onClick={() => setVipTable7Count(Math.max(0, vipTable7Count - 1))}>-</button>
-          <span>{vipTable7Count}</span>
-          <button className="incrementor3" onClick={() => setVipTable7Count(vipTable7Count + 1)}>+</button>
+
+      {/* VIP Table of 7 */}
+      <div className="mb-4 sm:mb-6">
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">VIP TABLE OF 7</p>
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">₦{formatPrice(ticketPrices.vipTable7)}</p>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleDecrement('vipTable7Count')}
+          >
+            -
+          </button>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable7Count}</span>
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleIncrement('vipTable7Count')}
+          >
+            +
+          </button>
         </div>
       </div>
-      <div className="divider"></div>
-      <div className="ticket-option">
-        <p className="Choose-vip10">VIP TABLE OF 10</p>
-        <p>₦{formatPrice(ticketPrices.vipTable10)}</p>
-        <div className="counter">
-          <button className="decrementor4" onClick={() => setVipTable10Count(Math.max(0, vipTable10Count - 1))}>-</button>
-          <span>{vipTable10Count}</span>
-          <button className="incrementor4" onClick={() => setVipTable10Count(vipTable10Count + 1)}>+</button>
+
+      {/* VIP Table of 10 */}
+      <div className="mb-4 sm:mb-6">
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">VIP TABLE OF 10</p>
+        <p className="m-1 sm:m-2 text-base sm:text-lg text-white">₦{formatPrice(ticketPrices.vipTable10)}</p>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleDecrement('vipTable10Count')}
+          >
+            -
+          </button>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable10Count}</span>
+          <button
+            className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
+            onClick={() => handleIncrement('vipTable10Count')}
+          >
+            +
+          </button>
         </div>
       </div>
-      <div className="divider"></div>
-      <button className="continue-btn" onClick={onContinue}>CONTINUE</button>
-    </>
+
+      <button
+        className="mt-4 px-4 py-2 sm:px-6 sm:py-3 border-2 border-gold rounded bg-black text-white text-sm sm:text-base cursor-pointer hover:bg-gold"
+        onClick={onContinue}
+      >
+        CONTINUE
+      </button>
+    </div>
   );
 }
 
