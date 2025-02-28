@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function useCheckoutState() {
+function useCheckout() {
   const [ticketCounts, setTicketCounts] = useState({
     earlyBirdCount: 0,
     regularCount: 0,
@@ -36,4 +36,4 @@ function useCheckoutState() {
   };
 }
 
-export default useCheckoutState;
+export default useCheckout;
