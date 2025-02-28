@@ -40,7 +40,7 @@ function CheckoutPage() {
   if (pricesLoading) return <div className="text-white text-center py-4">Loading ticket prices...</div>;
 
   return (
-    <div className=" bg-black flex flex-col lg:flex-row gap-4 sm:gap-8 lg:gap-16 p-4 sm:p-8 lg:p-36 max-w-screen-xl mx-auto">
+    <div className="bg-black flex flex-col lg:flex-row gap-4 sm:gap-8 lg:gap-16 p-4 sm:p-8 lg:p-36 w-full">
       <ProgressBar step={step} />
       <div className="w-full lg:flex-2 bg-black p-4 sm:p-6 lg:p-8 rounded-lg shadow-lg">
         {step === 1 && (
