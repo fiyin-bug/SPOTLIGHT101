@@ -4,24 +4,43 @@ import React from 'react';
 function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onBack, onContinue }) {
   const formatPrice = (price) => price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
- 
+  // Debug setters
+  console.log('setTicketCounts type:', typeof setTicketCounts, setTicketCounts);
+
   const handleIncrement = (key) => {
-    console.log(`Incrementing ${key} from ${ticketCounts[key]}`);
-    setTicketCounts((prevCounts) => ({
-      ...prevCounts,
-      [key]: prevCounts[key] + 1,
-    }));
-    console.log(`New ${key} value: ${ticketCounts[key] + 1}`);
+    console.log(`Before incrementing ${key}: ${ticketCounts[key] || 0}`);
+    if (typeof setTicketCounts !== 'function') {
+      console.error('setTicketCounts is not a function:', setTicketCounts);
+      return;
+    }
+    try {
+      // Use curried setTicketCounts with a function value
+      setTicketCounts(key)((prev) => {
+        const newCount = (prev || 0) + 1;
+        console.log(`After incrementing ${key}: ${newCount}`);
+        return newCount;
+      });
+    } catch (error) {
+      console.error('Error in setTicketCounts:', error);
+    }
   };
 
   const handleDecrement = (key) => {
-    console.log(`Decrementing ${key} from ${ticketCounts[key]}`);
-    const newCount = Math.max(0, ticketCounts[key] - 1);
-    setTicketCounts((prevCounts) => ({
-      ...prevCounts,
-      [key]: newCount,
-    }));
-    console.log(`New ${key} value: ${newCount}`);
+    console.log(`Before decrementing ${key}: ${ticketCounts[key] || 0}`);
+    if (typeof setTicketCounts !== 'function') {
+      console.error('setTicketCounts is not a function:', setTicketCounts);
+      return;
+    }
+    try {
+      // Use curried setTicketCounts with a function value
+      setTicketCounts(key)((prev) => {
+        const newCount = Math.max(0, (prev || 0) - 1);
+        console.log(`After decrementing ${key}: ${newCount}`);
+        return newCount;
+      });
+    } catch (error) {
+      console.error('Error in setTicketCounts:', error);
+    }
   };
 
   return (
@@ -45,7 +64,7 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onBack, o
           >
             -
           </button>
-          <span className="text-lg sm:text-xl font-bold">{ticketCounts.earlyBirdCount}</span>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.earlyBirdCount || 0}</span>
           <button
             className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
             onClick={() => handleIncrement('earlyBirdCount')}
@@ -66,7 +85,7 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onBack, o
           >
             -
           </button>
-          <span className="text-lg sm:text-xl font-bold">{ticketCounts.regularCount}</span>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.regularCount || 0}</span>
           <button
             className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base cursor-not-allowed"
             disabled
@@ -87,7 +106,7 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onBack, o
           >
             -
           </button>
-          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipSoloCount}</span>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipSoloCount || 0}</span>
           <button
             className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
             onClick={() => handleIncrement('vipSoloCount')}
@@ -108,7 +127,7 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onBack, o
           >
             -
           </button>
-          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable5Count}</span>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable5Count || 0}</span>
           <button
             className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
             onClick={() => handleIncrement('vipTable5Count')}
@@ -129,7 +148,7 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onBack, o
           >
             -
           </button>
-          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable7Count}</span>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable7Count || 0}</span>
           <button
             className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
             onClick={() => handleIncrement('vipTable7Count')}
@@ -150,7 +169,7 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onBack, o
           >
             -
           </button>
-          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable10Count}</span>
+          <span className="text-lg sm:text-xl font-bold">{ticketCounts.vipTable10Count || 0}</span>
           <button
             className="p-1 sm:p-2 border-2 border-gold rounded bg-black text-white text-sm sm:text-base hover:bg-gold"
             onClick={() => handleIncrement('vipTable10Count')}

@@ -7,14 +7,61 @@ import ContactForm from './ContactForm';
 import Summary from './Summary';
 import DiscountHandler from './DiscountHandler';
 import PaymentHandler from './PaymentHandler';
-import useCheckout from './useCheckout.jsx';
+import useCheckout from './useCheckout.jsx'; // Ensure this file exists
 import useTicketPrices from './useTicketPrices.jsx';
 import useTimer from './useTimer.jsx';
 
 function CheckoutPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const { ticketCounts, setTicketCounts, contactDetails, setContactDetails, errors, setErrors, totalWithDiscount, setTotalWithDiscount, discountAmount, setDiscountAmount } = useCheckout();
+
+  // Debug useCheckout
+  let checkoutState;
+  try {
+    checkoutState = useCheckout();
+    console.log('useCheckout returned:', checkoutState);
+  } catch (error) {
+    console.error('useCheckout failed:', error);
+    checkoutState = null;
+  }
+
+  // Fallback state if useCheckout fails
+  const [fallbackTicketCounts, setFallbackTicketCounts] = useState({
+    earlyBirdCount: 0,
+    regularCount: 0,
+    vipSoloCount: 0,
+    vipTable5Count: 0,
+    vipTable7Count: 0,
+    vipTable10Count: 0,
+  });
+  const [fallbackContactDetails, setFallbackContactDetails] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    referralCode: '',
+  });
+  const [fallbackErrors, setFallbackErrors] = useState({});
+  const [fallbackTotalWithDiscount, setFallbackTotalWithDiscount] = useState(0);
+  const [fallbackDiscountAmount, setFallbackDiscountAmount] = useState(0);
+
+  const {
+    ticketCounts = fallbackTicketCounts,
+    setTicketCounts = setFallbackTicketCounts,
+    contactDetails = fallbackContactDetails,
+    setContactDetails = setFallbackContactDetails,
+    errors = fallbackErrors,
+    setErrors = setFallbackErrors,
+    totalWithDiscount = fallbackTotalWithDiscount,
+    setTotalWithDiscount = setFallbackTotalWithDiscount,
+    discountAmount = fallbackDiscountAmount,
+    setDiscountAmount = setFallbackDiscountAmount,
+  } = checkoutState || {};
+
+  // Debug state setup
+  console.log('CheckoutPage - ticketCounts:', ticketCounts);
+  console.log('CheckoutPage - setTicketCounts type:', typeof setTicketCounts, setTicketCounts);
+
   const { ticketPrices, loading: pricesLoading } = useTicketPrices();
   const { timer, formatTime, resetTimer } = useTimer(step);
 
