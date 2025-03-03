@@ -24,4 +24,3 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
 }
 
 export default DiscountHandler;
-git pull
