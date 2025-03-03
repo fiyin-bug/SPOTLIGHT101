@@ -1,10 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Squash as Hamburger } from "hamburger-react";
 import { useRef, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+
 import { useClickAway } from "react-use";
 import Logo from "../assets/icons/spot.svg";
 import { Routes } from "../Links/routes";
+import TransitionLink from "../Links/transitionLinks";
+import TransitionNavLink from "../Links/transitionNavLink";
+
 
 const Navbar = () => {
   const ref = useRef(null);
@@ -27,13 +30,14 @@ const Navbar = () => {
             const { href, title } = route;
             return (
               <li key={index} className="flex flex-col items-center">
-                <NavLink
+                <TransitionNavLink
                   to={href}
                   className={({ isActive }) =>
                     `${
                       isActive ? "text-[#c5ac5a]" : "text-white"
                     } flex flex-col items-center text-lg transition-all hover:text-[#c5ac5a]`
                   }
+                  component={TransitionLink} // Use TransitionLink as the component
                 >
                   {({ isActive }) =>
                     isActive ? (
@@ -46,7 +50,7 @@ const Navbar = () => {
                       title
                     )
                   }
-                </NavLink>
+                </TransitionNavLink>
               </li>
             );
           })}
@@ -84,15 +88,15 @@ const Navbar = () => {
                         key={index}
                         className="w-full"
                       >
-                        <Link
+                        <TransitionLink
                           to={route.href}
-                          onClick={() => setIsNavOpen((prev) => !prev)}
+                          onClick={() => setIsNavOpen(false)}
                           className="flex w-full items-center justify-between rounded-xl p-2 hover:bg-primary"
                         >
                           <span className="flex gap-1 text-lg text-primary-dark hover:text-[#c5ac5a]">
                             {route.title}
                           </span>
-                        </Link>
+                        </TransitionLink>
 
                         {index !== Routes.length - 1 && (
                           <hr className="my-2 border-[#c5ac5a] border-2" />
