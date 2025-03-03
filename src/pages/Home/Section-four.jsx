@@ -31,7 +31,7 @@ const SectionFour = () => {
   }
 
   return (
-    <div ref={containerRef} className="relative w-full h-[5vh] md:h-[10vh] overflow-hidden bg-black">
+    <div ref={containerRef} className="relative w-full h-[10vh] md:h-[10vh] overflow-hidden bg-black">
       <motion.div
         className="flex absolute top-0 left-0 h-full"
         variants={sliderVariants}
@@ -39,7 +39,7 @@ const SectionFour = () => {
         animate={controls}
       >
         {[...CarouselImages, ...CarouselImages].map((image, index) => (
-          <div key={index} className="flex-shrink-0 w-full md:w-1/2 lg:w-1/6 h-full p-4">
+          <div key={index} className="flex-shrink-0 w-1/6 md:w-1/2 lg:w-1/6 h-full p-4">
             <div className="w-full h-full bg-black rounded-lg overflow-hidden flex items-center justify-center">
               <img src={image.image || "/placeholder.svg"} alt={image.alt} className="w-full h-full object-contain" />
             </div>
