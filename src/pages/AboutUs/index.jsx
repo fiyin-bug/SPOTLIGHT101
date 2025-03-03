@@ -1,9 +1,8 @@
-
-
+import Content from './Content.jsx'
 const AboutPage = () => {
   return (
-    <div>AboutPage</div>
+    <div><Content/></div>
   )
 }
 
-export default AboutPage
+export default AboutPage;

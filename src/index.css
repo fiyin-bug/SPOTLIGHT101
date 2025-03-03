@@ -5,3 +5,22 @@
 .body{
   background-color:black;
 }
+
+@keyframes typing {
+  from { max-width: 0; }
+  to { max-width: 100%; }
+}
+
+@keyframes blink-caret {
+  50% { border-color: transparent; }
+  100% { border-color: #c5ac5a; }
+}
+
+.typing-active {
+  display: inline-block;
+  overflow: hidden;
+  border-right: 2px solid #c5ac5a;
+  max-width: 0; /* Start with hidden text */
+  animation: typing 3s steps(40, end) forwards, blink-caret 0.75s step-end infinite;
+}
+
