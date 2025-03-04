@@ -31,16 +31,6 @@ function useCheckout() {
     setContactDetails,
     errors,
     setErrors,
-<<<<<<< HEAD
-    totalWithDiscount,
-    setTotalWithDiscount,
-    discountAmount,
-    setDiscountAmount,
-  };
-}
-
-export default useCheckout;
-=======
     discountAmount,
     setDiscountAmount,
   }
@@ -48,4 +38,3 @@ export default useCheckout;
 
 export default useCheckout
 
->>>>>>> 98fa7df4e6d2970f27f1b5715e067d72bbee1227
