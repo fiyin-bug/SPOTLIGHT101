@@ -42,7 +42,7 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
     setIsValidCode(isValid)
 
     if (isValid) {
-      const discountRate = 0.1 // 10% discount
+      const discountRate = 0.05 // 5% discount
       const discountAmount = originalTotal * discountRate
       setMessage("Referral code applied successfully!")
       onDiscountApplied(discountAmount)
