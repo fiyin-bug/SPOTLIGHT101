@@ -7,7 +7,7 @@ import ContactForm from './ContactForm';
 import Summary from './Summary';
 import DiscountHandler from './DiscountHandler';
 import PaymentHandler from './PaymentHandler';
-import useCheckout from './useCheckout.jsx'; // Ensure this file exists
+import useCheckout from './UseCheckout.jsx'; 
 import useTicketPrices from './useTicketPrices.jsx';
 import useTimer from './useTimer.jsx';
 
