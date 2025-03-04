@@ -8,7 +8,7 @@ import Summary from './Summary';
 import DiscountHandler from './DiscountHandler';
 import PaymentHandler from './PaymentHandler';
 import useCheckout from './UseCheckout.jsx'; 
-import useTicketPrices from './useTicketPrices.jsx';
+import useTicketPrices from './UseTicketPrices.jsx';
 import useTimer from './useTimer.jsx';
 
 function CheckoutPage() {
