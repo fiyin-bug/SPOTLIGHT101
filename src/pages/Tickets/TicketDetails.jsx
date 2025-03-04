@@ -10,7 +10,7 @@ const TicketDetails = () => {
 
   return (
     <div className="bg-black font-[Lato] flex flex-col gap-6 text-white w-full px-4 py-4 md:px-6 md:py-6 sm:px-6 lg:px-14 lg:py-8 ml-0">
-      <div className=" flex flex-col lg:flex-row justify-between items-center">
+      <div className=" flex flex-col gap-8 sm:gap-6 lg:gap-0  lg:flex-row justify-between items-center">
         <div className="">
           <img
             src={spotlightBanner}

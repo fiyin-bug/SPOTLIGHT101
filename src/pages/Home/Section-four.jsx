@@ -51,4 +51,3 @@ const SectionFour = () => {
 }
 
 export default SectionFour
-

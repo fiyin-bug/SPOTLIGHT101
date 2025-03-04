@@ -58,7 +58,7 @@ function Summary({ ticketCounts, ticketPrices, discountAmount }) {
             <div className="flex justify-between mb-2 text-green-400">
               <p className="flex items-center">
                 <Check className="h-4 w-4 mr-1" />
-                Discount (10%)
+                Discount (5%)
               </p>
               <p>-₦{formatPrice(discountAmount)}</p>
             </div>

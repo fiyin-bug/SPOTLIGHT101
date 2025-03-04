@@ -3,7 +3,7 @@ import { Sparkles, Target } from "lucide-react"
 const SectionThree = () => {
   return (
     <div className="bg-gradient-to-br from-black to-gray-900 text-white py-16">
-      <div className="container mx-auto px-4 md:px-6 lg:px-16">
+      <div className="container mx-auto px-8 md:px-6 lg:px-16">
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="space-y-6">
             <div className="flex items-center space-x-4">

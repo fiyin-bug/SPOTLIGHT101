@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 
 // Mock ticket prices - in a real app, you would fetch these from an API
 const mockPrices = {
-  earlyBird: 10000,
+  earlyBird: 10800,
   regular: 20000,
   vipSolo: 50000,
   vipTable5: 250000,
