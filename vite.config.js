@@ -4,5 +4,19 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  assetsInclude: ["**/*.jpg", "**/*.JPG"], // Ensure JPG files are treated as assets
+  assetsInclude: [
+    "**/*.jpg",
+    "**/*.JPG",
+    "**/*.jpeg",
+    "**/*.JPEG",
+    "**/*.png",
+    "**/*.PNG",
+    "**/*.gif",
+    "**/*.GIF",
+    "**/*.svg",
+    "**/*.SVG",
+    "**/*.webp",
+    "**/*.WEBP"
+  ]
+  // Ensure JPG files are treated as assets
 });
