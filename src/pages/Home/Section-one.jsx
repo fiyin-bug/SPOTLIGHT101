@@ -1,4 +1,4 @@
-"use client"
+// "use client"
 import { motion } from "framer-motion"
 import BackgroundVideo from "../../assets/gif/spotlight-background-video.mp4"
 
