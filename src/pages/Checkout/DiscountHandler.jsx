@@ -65,7 +65,7 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
         <p className={`text-sm ${isValidCode ? "text-green-400" : "text-red-400"}`}>{message}</p>
       </div>
 
-      {isValidCode && <p className="text-white text-sm mt-2">You received a 10% discount!</p>}
+      {isValidCode && <p className="text-white text-sm mt-2">You received a 5% discount!</p>}
     </div>
   )
 }
