@@ -9,7 +9,7 @@ import DiscountHandler from './DiscountHandler';
 import PaymentHandler from './PaymentHandler';
 import useCheckout from './UseCheckout.jsx'; 
 import useTicketPrices from './UseTicketPrices.jsx';
-import useTimer from './useTimer.jsx';
+import useTimer from './UseTimer.jsx';
 
 function CheckoutPage() {
   const navigate = useNavigate();
