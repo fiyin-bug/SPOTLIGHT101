@@ -1,4 +1,4 @@
-"use client"
+// "use client"
 import { motion } from "framer-motion"
 import { Music, Mic, CirclePlay, Calendar } from 'lucide-react'
 
@@ -42,7 +42,7 @@ const SectionTwo = () => {
 
   // eslint-disable-next-line react/prop-types
   const BouncingIcon = ({ icon: Icon, ...props }) => (
-    <motion.div variants={iconBounceVariants} animate="animate">
+    <motion.div variants={iconBounceVariants} animate="animate" {...props}>
       <Icon {...props} />
     </motion.div>
   )
@@ -88,7 +88,7 @@ const SectionTwo = () => {
 
         <motion.div className="mt-16 text-center" variants={itemVariants}>
           <a
-            href="/tickets"
+            href="/checkout"
             className="bg-[#c5ac5a] text-black px-8 py-3 rounded-full text-lg font-semibold hover:bg-[#d4bc6e] transition-colors duration-300"
           >
             Get Tickets

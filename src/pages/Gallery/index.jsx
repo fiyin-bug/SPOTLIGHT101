@@ -1,8 +1,8 @@
-
+import Image from './Image';
 
 const Gallery = () => {
   return (
-    <div>Gallery</div>
+    <div>well</div>
   )
 }
 

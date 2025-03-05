@@ -1,60 +1,39 @@
-"use client"
-
-import { useState, useEffect, useMemo } from "react"
-import { Check, X } from "lucide-react"
-import PropTypes from 'prop-types'
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import { Check, X } from 'lucide-react'; // Ensure this library is installed
 
 function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
-  const [isValidCode, setIsValidCode] = useState(false)
-  const [message, setMessage] = useState("")
+  const [isValidCode, setIsValidCode] = useState(false);
+  const [message, setMessage] = useState("");
 
-  // List of valid referral codes
-  const validReferralCodes = useMemo(() => [
-    "DAMI",
-    "STB",
-    "DARA",
-    "ORE",
-    "MONNIE",
-    "GUS",
-    "HXC",
-    "TUZO1960",
-    "JIGGY1536",
-    "VASTIFE",
-    "VEENA",
-    "NENYE",
-    "ZARA",
-    "RYANXGABBY",
-    "NXD",
-    "KAMAL",
-  ], [])
+  const validReferralCodes = [
+    'DAMI', 'STB', 'DARA', 'ORE', 'MONNIE', 'GUS', 'HXC', 'TUZO1960',
+    'JIGGY1536', 'VASTIFE', 'VEENA', 'NENYE', 'ZARA', 'RYANXGABBY', 'NXD', 'KAMAL'
+  ];
 
   useEffect(() => {
     if (!referralCode) {
-      setIsValidCode(false)
-      setMessage("")
-      onDiscountApplied(0)
-      return
+      setMessage("");
+      setIsValidCode(false);
+      onDiscountApplied(originalTotal, 0);
+      return;
     }
 
-    const code = referralCode.toUpperCase()
-    const isValid = validReferralCodes.includes(code)
-
-    setIsValidCode(isValid)
-
+    const isValid = validReferralCodes.includes(referralCode.toUpperCase());
+    const discountRate = 0.05; // 5% discount
+    const discountAmount = isValid ? originalTotal * discountRate : 0;
+    
     if (isValid) {
-      const discountRate = 0.05 // 5% discount
-      const discountAmount = originalTotal * discountRate
-      setMessage("Referral code applied successfully!")
-      onDiscountApplied(discountAmount)
+      setMessage("Referral code applied successfully!");
     } else {
-      setMessage("Invalid referral code.")
-      onDiscountApplied(0)
+      setMessage("Invalid referral code.");
     }
-  }, [referralCode, originalTotal, onDiscountApplied, validReferralCodes])
 
-  if (!referralCode) {
-    return null
-  }
+    setIsValidCode(isValid);
+    onDiscountApplied(originalTotal - discountAmount, discountAmount);
+  }, [referralCode, originalTotal, onDiscountApplied]);
+
+  if (!referralCode) return null;
 
   return (
     <div
@@ -64,17 +43,15 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
         {isValidCode ? <Check className="h-5 w-5 text-green-500 mr-2" /> : <X className="h-5 w-5 text-red-500 mr-2" />}
         <p className={`text-sm ${isValidCode ? "text-green-400" : "text-red-400"}`}>{message}</p>
       </div>
-
       {isValidCode && <p className="text-white text-sm mt-2">You received a 5% discount!</p>}
     </div>
-  )
+  );
 }
+
 DiscountHandler.propTypes = {
   referralCode: PropTypes.string,
   originalTotal: PropTypes.number.isRequired,
   onDiscountApplied: PropTypes.func.isRequired
-}
+};
 
-
-export default DiscountHandler
-
+export default DiscountHandler;
