@@ -10,8 +10,8 @@ const Contact = () => {
   const contactInfo = [
     { icon: Mail, text: "Asanbemusic@gmail.com", href: "mailto:Asanbemusic@gmail.com" },
     { icon: Phone, text: "09012518521", href: "tel:09012518521" },
-    { icon: Instagram, text: "Follow us on Instagram", href: "https://www.instagram.com/spotlightconcert/" },
-    { icon: Youtube, text: "Subscribe to our YouTube", href: "https://www.youtube.com/asanbemusic" },
+    { icon: Instagram, text: "Follow us on Instagram", href: "https://www.instagram.com/spotlightconcert" },
+    { icon: Youtube, text: "Subscribe to our YouTube", href: "https://m.youtube.com/channel/UCULK59kxjq1jpcP6Y2u3jCg" },
   ]
 
   const containerVariants = {
