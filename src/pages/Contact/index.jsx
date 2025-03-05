@@ -64,7 +64,7 @@ const Contact = () => {
         </motion.div>
       ))}
       <motion.div
-        className="bg-black bg-opacity-10 backdrop-blur-lg rounded-xl p-8 max-w-md w-full relative z-10"
+        className="bg-black bg-opacity-10 backdrop-blur-lg rounded-xl p-8 max-w-md w-full relative z-10 border border-[#c5ac5a]"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
