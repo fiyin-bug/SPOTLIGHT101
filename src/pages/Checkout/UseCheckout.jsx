@@ -1,6 +1,6 @@
-// "use client"
 
-import { useState } from "react"
+
+import { useState } from "react";
 
 function useCheckout() {
   // Initialize state with default values, not from localStorage
