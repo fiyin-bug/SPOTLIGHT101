@@ -11,7 +11,7 @@ const mockPrices = {
   vipTable10: 500000,
 }
 
-function useTicketPrices() {
+function TicketPrices() {
   const [ticketPrices, setTicketPrices] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -60,5 +60,5 @@ function useTicketPrices() {
   return { ticketPrices, loading, error }
 }
 
-export default useTicketPrices
+export default TicketPrices
 

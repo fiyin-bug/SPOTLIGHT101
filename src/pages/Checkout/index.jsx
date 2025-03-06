@@ -9,8 +9,8 @@ import Summary from "./Summary"
 import DiscountHandler from "./DiscountHandler"
 import PaymentHandler from "./PaymentHandler"
 import Checkout from "./Checkout"
-import useTicketPrices from "./useTicketPrices"
-import useTimer from "./useTimer"
+import TicketPrices from "./TicketPrices"
+import Timer from "./Timer"
 
 function CheckoutPage() {
   const navigate = useNavigate()
@@ -27,8 +27,8 @@ function CheckoutPage() {
     setDiscountAmount,
   } = Checkout()
 
-  const { ticketPrices, loading: pricesLoading, error: pricesError } = useTicketPrices()
-  const { timer, formatTime, resetTimer } = useTimer(step)
+  const { ticketPrices, loading: pricesLoading, error: pricesError } = TicketPrices()
+  const { timer, formatTime, resetTimer } = Timer(step)
 
   // Calculate subtotal based on ticket counts and prices
   const subtotal = useMemo(() => {
