@@ -1,4 +1,4 @@
-"use client"
+// "use client"
 
 import { useState } from "react"
 import { Mail, Phone, Instagram, Youtube, Music, Headphones, Mic } from "lucide-react"

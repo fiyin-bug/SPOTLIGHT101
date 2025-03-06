@@ -105,6 +105,6 @@ TicketSelector.propTypes = {
   onContinue: PropTypes.func.isRequired
 }
 
-export default TicketSelector
+export default TicketSelector;
 
 

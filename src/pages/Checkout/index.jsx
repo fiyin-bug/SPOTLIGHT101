@@ -1,4 +1,4 @@
-"use client"
+// "use client"
 
 import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
@@ -144,5 +144,5 @@ function CheckoutPage() {
   )
 }
 
-export default CheckoutPage
+export default CheckoutPage;
 
