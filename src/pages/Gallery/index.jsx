@@ -1,4 +1,4 @@
-import Image from './Image';
+
 
 const Gallery = () => {
   return (

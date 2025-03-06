@@ -1,4 +1,5 @@
 // "use client"
+
 import { motion } from "framer-motion"
 import { Eye, Target, Music, Award, Users, Mic } from "lucide-react"
 

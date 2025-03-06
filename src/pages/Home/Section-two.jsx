@@ -1,4 +1,4 @@
-// "use client"
+
 import { motion } from "framer-motion"
 import { Music, Mic, CirclePlay, Calendar } from 'lucide-react'
 

@@ -1,5 +1,3 @@
-// "use client"
-
 import { useState, useEffect, useMemo } from "react"
 import { Check, X } from "lucide-react"
 import PropTypes from 'prop-types'
