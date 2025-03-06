@@ -36,5 +36,5 @@ function useCheckout() {
   }
 }
 
-export default useCheckout
+export default useCheckout;
 
