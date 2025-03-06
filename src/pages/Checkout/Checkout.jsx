@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-function useCheckout() {
+function Checkout() {
   // Initialize state with default values, not from localStorage
   const [ticketCounts, setTicketCounts] = useState({
     earlyBirdCount: 0,
@@ -36,5 +36,5 @@ function useCheckout() {
   }
 }
 
-export default useCheckout;
+export default Checkout;
 

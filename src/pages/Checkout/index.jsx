@@ -8,7 +8,7 @@ import ContactForm from "./ContactForm"
 import Summary from "./Summary"
 import DiscountHandler from "./DiscountHandler"
 import PaymentHandler from "./PaymentHandler"
-import useCheckout from "./useCheckout"
+import Checkout from "./Checkout"
 import useTicketPrices from "./useTicketPrices"
 import useTimer from "./useTimer"
 
@@ -25,7 +25,7 @@ function CheckoutPage() {
     setErrors,
     discountAmount,
     setDiscountAmount,
-  } = useCheckout()
+  } = Checkout()
 
   const { ticketPrices, loading: pricesLoading, error: pricesError } = useTicketPrices()
   const { timer, formatTime, resetTimer } = useTimer(step)
