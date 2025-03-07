@@ -57,7 +57,7 @@ import B65 from "../../assets/images/Images/B65.JPG";
 import B66 from "../../assets/images/Images/B66.JPG";
 import B67 from "../../assets/images/Images/B67.JPG";
 import B68 from "../../assets/images/Images/B68.JPG";
-// import B69 from "../../assets/images/Images/B69.JPG";
+import B69 from "../../assets/images/Images/B69.JPG";
 import B70 from "../../assets/images/Images/B70.jpg";
 import B71 from "../../assets/images/Images/B71.jpg";
 import B72 from "../../assets/images/Images/B72.jpg";
@@ -72,7 +72,7 @@ import B80 from "../../assets/images/Images/B80.jpg";
 import B81 from "../../assets/images/Images/B81.jpg";
 
 const image = [
-  B10, B11, B13, B14, B15, B16, B17, B18, B19, B20, B21, B22, B23, B24, B25, B26, B27, B28, B29, B30, B31, B32, B33, B34, B35, B36, B37, B38, B39, B40, B41, B42, B43, B44, B45, B46, B47, B48, B49, B50, B51, B52, B53, B54, B55, B56, B57, B58, B59, B60, B61, B62, B63, B64, B65, B66, B67, B68,  B70, B71, B72, B73, B74, B75, B76, B77, B78, B79, B80, B81
+  B10, B11, B13, B14, B15, B16, B17, B18, B19, B20, B21, B22, B23, B24, B25, B26, B27, B28, B29, B30, B31, B32, B33, B34, B35, B36, B37, B38, B39, B40, B41, B42, B43, B44, B45, B46, B47, B48, B49, B50, B51, B52, B53, B54, B55, B56, B57, B58, B59, B60, B61, B62, B63, B64, B65, B66, B67, B68, B69, B70, B71, B72, B73, B74, B75, B76, B77, B78, B79, B80, B81
 ].map((img) => img);
 
 export default function Image() {
