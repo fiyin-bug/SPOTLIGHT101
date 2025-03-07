@@ -29,7 +29,7 @@ function CheckoutPage() {
 
   const { ticketPrices, loading: pricesLoading, error: pricesError } = TicketPrices()
   const { timer, formatTime, resetTimer } = Timer(step)
-
+                                                                                                                                                                                                                                                                                       
   // Calculate subtotal based on ticket counts and prices
   const subtotal = useMemo(() => {
     return Object.keys(ticketCounts).reduce(
