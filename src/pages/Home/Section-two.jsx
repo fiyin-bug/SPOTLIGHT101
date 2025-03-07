@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion"
 import { Music, Mic, CirclePlay, Calendar } from 'lucide-react'
+import { Link } from "react-router-dom"
 
 const SectionTwo = () => {
   const containerVariants = {
@@ -87,12 +88,12 @@ const SectionTwo = () => {
         </div>
 
         <motion.div className="mt-16 text-center" variants={itemVariants}>
-          <a
-            href="/tickets"
+          <Link
+            to="/tickets"
             className="bg-[#c5ac5a] text-black px-8 py-3 rounded-full text-lg font-semibold hover:bg-[#d4bc6e] transition-colors duration-300"
           >
             Get Tickets
-          </a>
+          </Link>
         </motion.div>
       </motion.div>
     </div>
