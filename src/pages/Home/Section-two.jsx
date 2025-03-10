@@ -1,6 +1,6 @@
-
 import { motion } from "framer-motion"
-import { Music, Mic, CirclePlay, Calendar } from 'lucide-react'
+import { Music, Mic, CirclePlay, Calendar } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 const SectionTwo = () => {
   const containerVariants = {
@@ -32,7 +32,7 @@ const SectionTwo = () => {
       y: [0, -10, 0],
       transition: {
         y: {
-          repeat: Infinity,
+          repeat: Number.POSITIVE_INFINITY,
           duration: 2,
           ease: "easeInOut",
         },
@@ -47,6 +47,12 @@ const SectionTwo = () => {
     </motion.div>
   )
 
+  const navigate = useNavigate()
+
+  const handleTicketClick = () => {
+    navigate("/tickets")
+  }
+
   return (
     <div className="bg-black text-white min-h-screen flex items-center justify-center py-16 lg:px-8 md:px-6 px-4">
       <motion.div className="container mx-auto px-4" variants={containerVariants} initial="hidden" animate="visible">
@@ -55,9 +61,10 @@ const SectionTwo = () => {
         </motion.h2>
 
         <motion.p className="text-xl mb-12 text-center max-w-3xl mx-auto" variants={itemVariants}>
-        Spotlight concert and awards was founded 4 years ago with the vision of giving upcoming artistes a spot in the limelight to prove themselves.Asides the competition, the regular concert goers have a blast vibing to hits from mainstream artistes, some of who have graced our stage are, The Late MOBHAD, ASAKE, SEYI VIBEZ, T-CLASSIC, DJ CONSEQUENCE, DJ NEPTUNE, DJ DSF
-       . Lagos get ready to rave !!!!
-              
+          Spotlight concert and awards was founded 4 years ago with the vision of giving upcoming artistes a spot in the
+          limelight to prove themselves.Asides the competition, the regular concert goers have a blast vibing to hits
+          from mainstream artistes, some of who have graced our stage are, The Late MOBHAD, ASAKE, SEYI VIBEZ,
+          T-CLASSIC, DJ CONSEQUENCE, DJ NEPTUNE, DJ DSF . Lagos get ready to rave !!!!
         </motion.p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -87,12 +94,16 @@ const SectionTwo = () => {
         </div>
 
         <motion.div className="mt-16 text-center" variants={itemVariants}>
-          <a
-            href="/tickets"
-            className="bg-[#c5ac5a] text-black px-8 py-3 rounded-full text-lg font-semibold hover:bg-[#d4bc6e] transition-colors duration-300"
+          <motion.button
+            onClick={handleTicketClick}
+            className="inline-block"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            Get Tickets
-          </a>
+            <span className="bg-[#c5ac5a] text-black px-8 py-3 rounded-full text-lg font-semibold hover:bg-[#d4bc6e] transition-colors duration-300 inline-block">
+              Get Tickets
+            </span>
+          </motion.button>
         </motion.div>
       </motion.div>
     </div>
@@ -100,3 +111,4 @@ const SectionTwo = () => {
 }
 
 export default SectionTwo
+
