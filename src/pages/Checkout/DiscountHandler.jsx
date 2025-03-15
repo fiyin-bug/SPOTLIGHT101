@@ -10,6 +10,8 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
   const validReferralCodes = useMemo(() => [
     "DAMI",
     "STB",
+    "CODEDTINS",
+    "KINGTIFE01",
     "DARA",
     "ORE",
     "MONNIE",
