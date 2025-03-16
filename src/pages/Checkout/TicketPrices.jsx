@@ -6,9 +6,9 @@ const mockPrices = {
   earlyBird: 10800,
   regular: 20000,
   vipSolo: 50000,
-  vipTable5: 250000,
-  vipTable7: 350000,
-  vipTable10: 500000,
+  vipTable5: 500000,
+  vipTable7: 1000000,
+  vipTable10: 2000000,
 }
 
 function TicketPrices() {
