@@ -1,4 +1,3 @@
-// src/App.jsx
 import {
   Route,
   RouterProvider,
@@ -12,7 +11,8 @@ import AboutPage from "./pages/AboutUs";
 import TicketPage from "./pages/Tickets";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
-import Checkout from "./pages/Checkout"; 
+import Checkout from "./pages/Checkout";
+import TicketDetails from "./pages/TicketDetails"; // Adjust path based on your file structure
 
 function App() {
   const router = createBrowserRouter(
@@ -23,8 +23,8 @@ function App() {
         <Route path="/tickets" element={<TicketPage />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/contact" element={<Contact />} />
-        {/* <Route path="/ticket" element={<} /> */}
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/ticket-details/:ticketId" element={<TicketDetails />} />
       </Route>
     )
   );
