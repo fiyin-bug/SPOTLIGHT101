@@ -26,6 +26,9 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
     "RYANXGABBY",
     "NXD",
     "KAMAL",
+    "MRMORALE53",
+    "MISHAEL007",
+    "JOE4REAL",
   ], [])
 
   useEffect(() => {

@@ -49,7 +49,8 @@ function PaymentHandler({ contactDetails, totalWithDiscount, onBack }) {
       // Initialize Paystack transaction
       const paystack = new PaystackPop()
       paystack.newTransaction({
-        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
+        // key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
+        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
