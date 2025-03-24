@@ -1,16 +1,16 @@
 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import PaystackPop from "@paystack/inline-js";
+import * as Yup from "yup";
+import { CreditCard, ArrowLeft } from "lucide-react";
+import PropTypes from "prop-types";
+import axiosInstance from "./utils/axiosInstance";
 
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import PaystackPop from "@paystack/inline-js"
-import * as Yup from "yup"
-import { CreditCard, ArrowLeft } from "lucide-react"
-import PropTypes from 'prop-types'
-
-function PaymentHandler({ contactDetails, totalWithDiscount, onBack }) {
-  const navigate = useNavigate()
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentError, setPaymentError] = useState(null)
+function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBack }) {
+  const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
 
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -18,7 +18,7 @@ function PaymentHandler({ contactDetails, totalWithDiscount, onBack }) {
       .matches(/^[A-Za-z]+$/, "First Name should contain only letters"),
     lastName: Yup.string()
       .required("Last Name is required")
-      .matches(/^[A-Za-z]+$/, "Last Name should contain only letters"),
+      .matches(/^[A-Za-z]+$/, "First Name should contain only letters"),
     email: Yup.string().email("Invalid email address").required("Email is required"),
     phone: Yup.string()
       .required("Phone Number is required")
@@ -26,36 +26,58 @@ function PaymentHandler({ contactDetails, totalWithDiscount, onBack }) {
       .min(10, "Phone Number must be at least 10 digits")
       .max(15, "Phone Number must be at most 15 digits"),
     referralCode: Yup.string().nullable(),
-  })
+  });
 
-  const initializePaystack = async () => {
-    setIsProcessing(true)
-    setPaymentError(null)
+  const initializePayment = async () => {
+    setIsProcessing(true);
+    setPaymentError(null);
 
     try {
-      // Validate contact details
-      await contactSchema.validate(contactDetails, { abortEarly: false })
+      await contactSchema.validate(contactDetails, { abortEarly: false });
 
-      // Ensure totalWithDiscount is a valid number
       if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
-        throw new Error("Invalid payment amount: totalWithDiscount must be a valid number greater than 0.")
+        throw new Error("Invalid payment amount.");
       }
 
-      const amountInKobo = Math.round(totalWithDiscount * 100) // Convert to kobo
+      const tickets = {
+        earlyBird: ticketCounts.earlyBirdCount,
+        regular: ticketCounts.regularCount,
+        vipSolo: ticketCounts.vipSoloCount,
+        vipTable5: ticketCounts.vipTable5Count,
+        vipTable7: ticketCounts.vipTable7Count,
+        vipTable10: ticketCounts.vipTable10Count,
+      };
 
-      // Generate a unique reference
-      const reference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`
+      const totalTickets = Object.values(tickets).reduce((sum, count) => sum + count, 0);
 
-      // Initialize Paystack transaction
-      const paystack = new PaystackPop()
+      const ticketData = {
+        eventName: "Spotlight Concert 2025", // Temporary hardcoded value
+        firstName: contactDetails.firstName,
+        lastName: contactDetails.lastName,
+        userEmail: contactDetails.email,
+        phone: contactDetails.phone,
+        referralCode: contactDetails.referralCode || null,
+        tickets,
+        totalTickets,
+        totalPrice: totalWithDiscount,
+      };
+
+      // Corrected endpoint to match backend route
+      const response = await axiosInstance.post("https://spotlight-znvr.onrender.com/api/tickets/purchase", ticketData);
+      const ticketId = response.data.ticket._id;
+
+      const amountInKobo = Math.round(totalWithDiscount * 100);
+      const reference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+
+      const paystack = new PaystackPop();
       paystack.newTransaction({
-        // key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
         key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
         reference,
         metadata: {
+          ticketId,
           custom_fields: [
             {
               display_name: "Customer Name",
@@ -69,44 +91,41 @@ function PaymentHandler({ contactDetails, totalWithDiscount, onBack }) {
             },
           ],
         },
-        onSuccess: (response) => {
-          // Clear checkout data from localStorage on successful payment
-          localStorage.removeItem("checkoutStep")
-          localStorage.removeItem("checkoutTimer")
-
-          // Store the transaction reference for ticket retrieval
-          localStorage.setItem("lastTransactionRef", response.reference)
-
-          // Navigate to success page
-          navigate(`/ticket-details/${response.reference}`)
+        onSuccess: async (response) => {
+          // Optional: Update ticket status to "confirmed"
+          await axiosInstance.put(`https://spotlight-znvr.onrender.com/api/tickets/${ticketId}`, {
+            status: "confirmed",
+            paymentReference: response.reference,
+          });
+          localStorage.removeItem("checkoutStep");
+          localStorage.removeItem("checkoutTimer");
+          localStorage.setItem("lastTransactionRef", response.reference);
+          navigate(`/ticket-details/${ticketId}`);
         },
         onCancel: () => {
-          setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.")
-          setIsProcessing(false)
+          setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
+          setIsProcessing(false);
         },
-      })
+      });
     } catch (error) {
-      console.error("Payment initialization error:", error.message)
-      setPaymentError(error.message)
-      setIsProcessing(false)
+      console.error("Payment initialization error:", error.message);
+      setPaymentError(error.message || "An error occurred during payment initialization.");
+      setIsProcessing(false);
     }
-  }
+  };
 
   return (
     <div className="w-full">
       <h2 className="text-2xl font-bold text-white mb-6">Complete Your Payment</h2>
-
       <div className="bg-gray-900 p-6 rounded-lg border border-gold mb-6">
         <div className="flex items-center mb-4">
           <CreditCard className="h-6 w-6 text-gold mr-2" />
           <h3 className="text-lg font-medium text-white">Payment Information</h3>
         </div>
-
         <p className="text-gray-300 mb-4">
-          You&apos;re about to purchase tickets for the concert. Click the button below to proceed with your payment securely
+          You're about to purchase tickets for the concert. Click the button below to proceed with your payment securely
           via Paystack.
         </p>
-
         <div className="bg-black bg-opacity-50 p-4 rounded-lg mb-4">
           <div className="flex justify-between mb-2">
             <span className="text-gray-400">Name:</span>
@@ -123,13 +142,11 @@ function PaymentHandler({ contactDetails, totalWithDiscount, onBack }) {
             <span className="text-gold font-bold">₦{totalWithDiscount.toLocaleString("en-NG")}</span>
           </div>
         </div>
-
         {paymentError && (
           <div className="bg-red-900 bg-opacity-30 border border-red-500 text-red-200 p-4 rounded-lg mb-4">
             {paymentError}
           </div>
         )}
-
         <div className="flex justify-between mt-6">
           <button
             type="button"
@@ -140,10 +157,9 @@ function PaymentHandler({ contactDetails, totalWithDiscount, onBack }) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </button>
-
           <button
             className="px-6 py-3 bg-gold text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-            onClick={initializePaystack}
+            onClick={initializePayment}
             disabled={isProcessing}
           >
             {isProcessing ? "Processing..." : "Pay Now"}
@@ -151,21 +167,20 @@ function PaymentHandler({ contactDetails, totalWithDiscount, onBack }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
+
 PaymentHandler.propTypes = {
   contactDetails: PropTypes.shape({
     firstName: PropTypes.string.isRequired,
     lastName: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
     phone: PropTypes.string.isRequired,
-    referralCode: PropTypes.string
+    referralCode: PropTypes.string,
   }).isRequired,
   ticketCounts: PropTypes.object.isRequired,
   totalWithDiscount: PropTypes.number.isRequired,
-  onBack: PropTypes.func.isRequired
-}
+  onBack: PropTypes.func.isRequired,
+};
 
-export default PaymentHandler
-
-
+export default PaymentHandler;
