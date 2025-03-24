@@ -17,7 +17,7 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
     "MONNIE",
     "GUS",
     "HXC",
-    "FINNIE"
+    "FINNIE",
     "TUZO1960",
     "JIGGY1536",
     "VASTIFE",
