@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaystackPop from "@paystack/inline-js";
@@ -6,19 +5,21 @@ import * as Yup from "yup";
 import { CreditCard, ArrowLeft } from "lucide-react";
 import PropTypes from "prop-types";
 import axiosInstance from "./utils/axiosInstance";
+import { v4 as uuidv4 } from "uuid";
 
 function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBack }) {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
 
+  // Validation schema for contact details
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
       .required("First Name is required")
       .matches(/^[A-Za-z]+$/, "First Name should contain only letters"),
     lastName: Yup.string()
       .required("Last Name is required")
-      .matches(/^[A-Za-z]+$/, "First Name should contain only letters"),
+      .matches(/^[A-Za-z]+$/, "Last Name should contain only letters"),
     email: Yup.string().email("Invalid email address").required("Email is required"),
     phone: Yup.string()
       .required("Phone Number is required")
@@ -33,12 +34,15 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
     setPaymentError(null);
 
     try {
+      // Validate contact details
       await contactSchema.validate(contactDetails, { abortEarly: false });
 
+      // Ensure payment amount is valid
       if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
         throw new Error("Invalid payment amount.");
       }
 
+      // Map ticket counts to backend expected format
       const tickets = {
         earlyBird: ticketCounts.earlyBirdCount,
         regular: ticketCounts.regularCount,
@@ -50,28 +54,39 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
 
       const totalTickets = Object.values(tickets).reduce((sum, count) => sum + count, 0);
 
+      // Prepare ticket data matching purchaseTicket requirements
       const ticketData = {
-        eventName: "Spotlight Concert 2025", // Temporary hardcoded value
+        eventName: "Spotlight", // Matches backend default; adjust if multi-event
         firstName: contactDetails.firstName,
         lastName: contactDetails.lastName,
-        userEmail: contactDetails.email,
+        email: contactDetails.email, // Backend maps to userEmail
         phone: contactDetails.phone,
         referralCode: contactDetails.referralCode || null,
         tickets,
-        totalTickets,
-        totalPrice: totalWithDiscount,
+        price: totalWithDiscount, // Backend expects "price"
+        ticketId: uuidv4(), // Generate unique ticketId required by schema
       };
 
-      // Corrected endpoint to match backend route
-      const response = await axiosInstance.post("https://spotlight-znvr.onrender.com/api/tickets/purchase", ticketData);
-      const ticketId = response.data.ticket._id;
+      // Send ticket purchase request
+      const response = await axiosInstance.post(
+        "https://spotlight-znvr.onrender.com/api/tickets/purchase",
+        ticketData
+      );
+      console.log("POST Response:", response.data); // Debug response
 
+      // Extract ticketId (_id) from response
+      const ticketId = response.data.ticketId;
+      if (!ticketId) {
+        throw new Error("No ticket ID returned from server");
+      }
+
+      // Prepare Paystack payment
       const amountInKobo = Math.round(totalWithDiscount * 100);
       const reference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
       const paystack = new PaystackPop();
       paystack.newTransaction({
-        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
+        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7", // Replace with live key in production
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
@@ -91,15 +106,12 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             },
           ],
         },
-        onSuccess: async (response) => {
-          // Optional: Update ticket status to "confirmed"
-          await axiosInstance.put(`https://spotlight-znvr.onrender.com/api/tickets/${ticketId}`, {
-            status: "confirmed",
-            paymentReference: response.reference,
-          });
+        onSuccess: (response) => {
+          // Clean up local storage and navigate
           localStorage.removeItem("checkoutStep");
           localStorage.removeItem("checkoutTimer");
           localStorage.setItem("lastTransactionRef", response.reference);
+          console.log("Navigating to:", `/ticket-details/${ticketId}`);
           navigate(`/ticket-details/${ticketId}`);
         },
         onCancel: () => {
@@ -108,8 +120,8 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
         },
       });
     } catch (error) {
-      console.error("Payment initialization error:", error.message);
-      setPaymentError(error.message || "An error occurred during payment initialization.");
+      console.error("Payment initialization error:", error.response?.data || error.message);
+      setPaymentError(error.response?.data?.error || "An error occurred during payment initialization.");
       setIsProcessing(false);
     }
   };
@@ -117,15 +129,18 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   return (
     <div className="w-full">
       <h2 className="text-2xl font-bold text-white mb-6">Complete Your Payment</h2>
+
       <div className="bg-gray-900 p-6 rounded-lg border border-gold mb-6">
         <div className="flex items-center mb-4">
           <CreditCard className="h-6 w-6 text-gold mr-2" />
           <h3 className="text-lg font-medium text-white">Payment Information</h3>
         </div>
+
         <p className="text-gray-300 mb-4">
           You're about to purchase tickets for the concert. Click the button below to proceed with your payment securely
           via Paystack.
         </p>
+
         <div className="bg-black bg-opacity-50 p-4 rounded-lg mb-4">
           <div className="flex justify-between mb-2">
             <span className="text-gray-400">Name:</span>
@@ -142,11 +157,13 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             <span className="text-gold font-bold">₦{totalWithDiscount.toLocaleString("en-NG")}</span>
           </div>
         </div>
+
         {paymentError && (
           <div className="bg-red-900 bg-opacity-30 border border-red-500 text-red-200 p-4 rounded-lg mb-4">
             {paymentError}
           </div>
         )}
+
         <div className="flex justify-between mt-6">
           <button
             type="button"
@@ -157,6 +174,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </button>
+
           <button
             className="px-6 py-3 bg-gold text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
             onClick={initializePayment}
