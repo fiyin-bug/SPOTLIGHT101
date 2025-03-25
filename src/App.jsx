@@ -12,7 +12,7 @@ import TicketPage from "./pages/Tickets";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Checkout from "./pages/Checkout";
-import TicketDetails from "./pages/TicketDetails"; // Adjust path based on your file structure
+import TicketDetails from "./pages/Checkout/TicketDetails"; // Adjust path based on your file structure
 
 function App() {
   const router = createBrowserRouter(

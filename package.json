@@ -12,6 +12,7 @@
   "dependencies": {
     "@paystack/inline-js": "^2.22.2",
     "@tailwindcss/vite": "^4.0.7",
+    "axios": "^1.8.4",
     "framer-motion": "^12.4.10",
     "gsap": "^3.12.7",
     "hamburger-react": "^2.5.2",
@@ -34,6 +35,6 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "globals": "^15.14.0",
-    "vite": "^6.1.1"
+    "vite": "^6.2.3"
   }
 }

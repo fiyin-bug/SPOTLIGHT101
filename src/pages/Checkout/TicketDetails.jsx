@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axiosInstance from "./utils/axiosInstance";
+import axiosInstance from "../../utils/axiosInstance";
 import { TicketIcon } from "lucide-react";
-import Spin from "./Spin";
+
 
 const TicketDetails = () => {
   const { ticketId } = useParams();
@@ -12,12 +12,14 @@ const TicketDetails = () => {
 
   useEffect(() => {
     const fetchTicketDetails = async () => {
+      console.log("Fetching ticket for ID:", ticketId); // Log ticketId
       try {
         const response = await axiosInstance.get(`https://spotlight-znvr.onrender.com/api/tickets/${ticketId}`);
+        console.log("GET Response:", response.data); // Log full response
         setTicket(response.data.ticket);
       } catch (err) {
-        console.error("Error fetching ticket details:", err);
-        setError("Failed to fetch ticket details.");
+        console.error("Error fetching ticket details:", err.response?.status, err.response?.data || err.message);
+        setError("Failed to fetch ticket details. Please check your ticket ID.");
       } finally {
         setLoading(false);
       }
@@ -108,10 +110,6 @@ const TicketDetails = () => {
             </div>
           </div>
         )}
-
-        <div className="mt-6 flex justify-center">
-          <Spin />
-        </div>
       </div>
     </div>
   );

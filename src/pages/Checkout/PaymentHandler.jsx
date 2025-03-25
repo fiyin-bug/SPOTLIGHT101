@@ -4,13 +4,15 @@ import PaystackPop from "@paystack/inline-js";
 import * as Yup from "yup";
 import { CreditCard, ArrowLeft } from "lucide-react";
 import PropTypes from "prop-types";
-import axiosInstance from "./utils/axiosInstance";
+import axiosInstance from "../../utils/axiosInstance";
 import { v4 as uuidv4 } from "uuid";
 
 function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBack }) {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
+
+  console.log("PaymentHandler props:", { contactDetails, ticketCounts, totalWithDiscount }); // Log props
 
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -29,15 +31,20 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   });
 
   const initializePayment = async () => {
+    console.log("Starting payment initialization");
     setIsProcessing(true);
     setPaymentError(null);
 
     try {
+      console.log("Validating contact details:", contactDetails);
       await contactSchema.validate(contactDetails, { abortEarly: false });
+      console.log("Contact validation passed");
 
+      console.log("Checking totalWithDiscount:", totalWithDiscount);
       if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
         throw new Error("Invalid payment amount.");
       }
+      console.log("Amount check passed");
 
       const tickets = {
         earlyBird: ticketCounts.earlyBirdCount,
@@ -49,6 +56,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
       };
 
       const totalTickets = Object.values(tickets).reduce((sum, count) => sum + count, 0);
+      console.log("Total tickets:", totalTickets);
 
       const ticketData = {
         eventName: "Spotlight",
@@ -78,10 +86,17 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
       console.log("Extracted ticketId:", ticketId);
 
       const amountInKobo = Math.round(totalWithDiscount * 100);
+      console.log("Amount in kobo:", amountInKobo);
       const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
       console.log("Paystack reference:", paymentReference);
 
       const paystack = new PaystackPop();
+      console.log("Initializing Paystack with:", {
+        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
+        email: contactDetails.email,
+        amount: amountInKobo,
+        reference: paymentReference,
+      });
       paystack.newTransaction({
         key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
         email: contactDetails.email,
@@ -120,7 +135,12 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
       });
     } catch (error) {
       console.error("Payment initialization error:", error.response?.data || error.message);
-      setPaymentError(error.response?.data?.error || "An error occurred during payment initialization.");
+      if (error instanceof Yup.ValidationError) {
+        console.log("Validation errors:", error.errors);
+        setPaymentError("Validation failed: " + error.errors.join(", "));
+      } else {
+        setPaymentError(error.response?.data?.error || "An error occurred during payment initialization.");
+      }
       setIsProcessing(false);
     }
   };
