@@ -12,7 +12,6 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
 
-  // Validation schema for contact details
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
       .required("First Name is required")
@@ -34,15 +33,12 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
     setPaymentError(null);
 
     try {
-      // Validate contact details
       await contactSchema.validate(contactDetails, { abortEarly: false });
 
-      // Ensure payment amount is valid
       if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
         throw new Error("Invalid payment amount.");
       }
 
-      // Map ticket counts to backend expected format
       const tickets = {
         earlyBird: ticketCounts.earlyBirdCount,
         regular: ticketCounts.regularCount,
@@ -54,43 +50,44 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
 
       const totalTickets = Object.values(tickets).reduce((sum, count) => sum + count, 0);
 
-      // Prepare ticket data matching purchaseTicket requirements
       const ticketData = {
-        eventName: "Spotlight", // Matches backend default; adjust if multi-event
+        eventName: "Spotlight",
         firstName: contactDetails.firstName,
         lastName: contactDetails.lastName,
-        email: contactDetails.email, // Backend maps to userEmail
+        email: contactDetails.email,
         phone: contactDetails.phone,
         referralCode: contactDetails.referralCode || null,
         tickets,
-        price: totalWithDiscount, // Backend expects "price"
-        ticketId: uuidv4(), // Generate unique ticketId required by schema
+        price: totalWithDiscount,
+        ticketId: uuidv4(),
       };
 
-      // Send ticket purchase request
-      const response = await axiosInstance.post(
+      console.log("Sending ticket data:", ticketData);
+
+      const postResponse = await axiosInstance.post(
         "https://spotlight-znvr.onrender.com/api/tickets/purchase",
         ticketData
       );
-      console.log("POST Response:", response.data); // Debug response
+      console.log("POST Response:", postResponse.data);
 
-      // Extract ticketId (_id) from response
-      const ticketId = response.data.ticketId;
+      const ticketId = postResponse.data.ticketId;
       if (!ticketId) {
+        console.error("No ticketId in response:", postResponse.data);
         throw new Error("No ticket ID returned from server");
       }
+      console.log("Extracted ticketId:", ticketId);
 
-      // Prepare Paystack payment
       const amountInKobo = Math.round(totalWithDiscount * 100);
-      const reference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+      const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+      console.log("Paystack reference:", paymentReference);
 
       const paystack = new PaystackPop();
       paystack.newTransaction({
-        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7", // Replace with live key in production
+        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
-        reference,
+        reference: paymentReference,
         metadata: {
           ticketId,
           custom_fields: [
@@ -106,15 +103,17 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             },
           ],
         },
-        onSuccess: (response) => {
-          // Clean up local storage and navigate
+        onSuccess: (paystackResponse) => {
+          console.log("Payment successful:", paystackResponse);
           localStorage.removeItem("checkoutStep");
           localStorage.removeItem("checkoutTimer");
-          localStorage.setItem("lastTransactionRef", response.reference);
+          localStorage.setItem("lastTransactionRef", paystackResponse.reference);
           console.log("Navigating to:", `/ticket-details/${ticketId}`);
           navigate(`/ticket-details/${ticketId}`);
+          console.log("Navigation triggered");
         },
         onCancel: () => {
+          console.log("Payment cancelled");
           setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
           setIsProcessing(false);
         },
@@ -129,18 +128,15 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   return (
     <div className="w-full">
       <h2 className="text-2xl font-bold text-white mb-6">Complete Your Payment</h2>
-
       <div className="bg-gray-900 p-6 rounded-lg border border-gold mb-6">
         <div className="flex items-center mb-4">
           <CreditCard className="h-6 w-6 text-gold mr-2" />
           <h3 className="text-lg font-medium text-white">Payment Information</h3>
         </div>
-
         <p className="text-gray-300 mb-4">
           You're about to purchase tickets for the concert. Click the button below to proceed with your payment securely
           via Paystack.
         </p>
-
         <div className="bg-black bg-opacity-50 p-4 rounded-lg mb-4">
           <div className="flex justify-between mb-2">
             <span className="text-gray-400">Name:</span>
@@ -157,13 +153,11 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             <span className="text-gold font-bold">₦{totalWithDiscount.toLocaleString("en-NG")}</span>
           </div>
         </div>
-
         {paymentError && (
           <div className="bg-red-900 bg-opacity-30 border border-red-500 text-red-200 p-4 rounded-lg mb-4">
             {paymentError}
           </div>
         )}
-
         <div className="flex justify-between mt-6">
           <button
             type="button"
@@ -174,7 +168,6 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </button>
-
           <button
             className="px-6 py-3 bg-gold text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
             onClick={initializePayment}
