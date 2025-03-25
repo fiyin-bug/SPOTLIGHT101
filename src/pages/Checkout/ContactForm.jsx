@@ -1,10 +1,9 @@
-
-import { useState } from "react"
-import * as Yup from "yup"
-import PropTypes from "prop-types"
+import { useState } from "react";
+import * as Yup from "yup";
+import PropTypes from "prop-types";
 
 function ContactForm({ contactDetails, setContactDetails, errors, setErrors, timer, onSubmit, onBack }) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -22,62 +21,41 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
     referralCode: Yup.string()
       .nullable()
       .test("valid-referral", "Invalid referral code", (value) => {
-        if (!value) return true
+        if (!value) return true;
         const validReferralCodes = [
-          "DAMI",
-    "STB",
-    "CODEDTINS",
-    "KINGTIFE01",
-    "DARA",
-    "ORE",
-    "MONNIE",
-    "GUS",
-    "HXC",
-    "FINNIE",
-    "TUZO1960",
-    "JIGGY1536",
-    "VASTIFE",
-    "VEENA",
-    "NENYE",
-    "ZARA",
-    "RYANXGABBY",
-    "NXD",
-    "KAMAL",
-    "MRMORALE53",
-    "MISHAEL007",
-    "JOE4REAL",
-        ]
-        return validReferralCodes.includes(value.toUpperCase())
+          "DAMI", "STB", "CODEDTINS", "KINGTIFE01", "DARA", "ORE", "MONNIE", "GUS",
+          "HXC", "FINNIE", "TUZO1960", "JIGGY1536", "VASTIFE", "VEENA", "NENYE",
+          "ZARA", "RYANXGABBY", "NXD", "KAMAL", ,"AZANAT", "MISHAEL007", "JOE4REAL",
+        ];
+        return validReferralCodes.includes(value.trim().toUpperCase());
       }),
-  })
+  });
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      await contactSchema.validate(contactDetails, { abortEarly: false })
-      onSubmit()
+      await contactSchema.validate(contactDetails, { abortEarly: false });
+      onSubmit();
     } catch (validationError) {
-      const newErrors = {}
+      const newErrors = {};
       validationError.inner.forEach((error) => {
-        newErrors[error.path] = error.message
-      })
-      setErrors(newErrors)
+        newErrors[error.path] = error.message;
+      });
+      setErrors(newErrors);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setContactDetails((prev) => ({ ...prev, [name]: value }))
-
-    // Clear error when field is edited
+    const { name, value } = e.target;
+    setContactDetails((prev) => ({ ...prev, [name]: value.trim() }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }))
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
-  }
+  };
 
   return (
     <div className="w-full">
@@ -168,7 +146,7 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
             name="referralCode"
             type="text"
             placeholder="Enter referral code (if any)"
-            value={contactDetails.referralCode}
+            value={contactDetails.referralCode || ""}
             onChange={handleChange}
             className={`w-full p-3 bg-gray-900 border ${errors.referralCode ? "border-red-500" : "border-gold"} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-gold`}
           />
@@ -195,15 +173,16 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
         </div>
       </form>
     </div>
-  )
+  );
 }
+
 ContactForm.propTypes = {
   contactDetails: PropTypes.shape({
     firstName: PropTypes.string,
     lastName: PropTypes.string,
     email: PropTypes.string,
     phone: PropTypes.string,
-    referralCode: PropTypes.string
+    referralCode: PropTypes.string,
   }).isRequired,
   setContactDetails: PropTypes.func.isRequired,
   errors: PropTypes.shape({
@@ -211,14 +190,12 @@ ContactForm.propTypes = {
     lastName: PropTypes.string,
     email: PropTypes.string,
     phone: PropTypes.string,
-    referralCode: PropTypes.string
+    referralCode: PropTypes.string,
   }).isRequired,
   setErrors: PropTypes.func.isRequired,
   timer: PropTypes.string.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  onBack: PropTypes.func.isRequired
-}
+  onBack: PropTypes.func.isRequired,
+};
 
-
-export default ContactForm
-
+export default ContactForm;

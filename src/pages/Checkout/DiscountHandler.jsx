@@ -27,6 +27,7 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
     "RYANXGABBY",
     "NXD",
     "KAMAL",
+    "AZANAT",
     "MRMORALE53",
     "MISHAEL007",
     "JOE4REAL",
