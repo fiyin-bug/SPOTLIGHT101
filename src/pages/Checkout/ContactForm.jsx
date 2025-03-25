@@ -25,7 +25,7 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
         const validReferralCodes = [
           "DAMI", "STB", "CODEDTINS", "KINGTIFE01", "DARA", "ORE", "MONNIE", "GUS",
           "HXC", "FINNIE", "TUZO1960", "JIGGY1536", "VASTIFE", "VEENA", "NENYE",
-          "ZARA", "RYANXGABBY", "NXD", "KAMAL", ,"AZANAT", "MISHAEL007", "JOE4REAL",
+          "ZARA", "RYANXGABBY", "NXD", "KAMAL","MRMORALE53" ,"AZANAT", "MISHAEL007", "JOE4REAL",
         ];
         return validReferralCodes.includes(value.trim().toUpperCase());
       }),
