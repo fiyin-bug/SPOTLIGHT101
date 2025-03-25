@@ -40,7 +40,7 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
       return
     }
 
-    const code = referralCode.toUpperCase()
+    const code = referralCode.toUpperCase().trim(); // Ensure code is uppercase and trimmed
     const isValid = validReferralCodes.includes(code)
 
     setIsValidCode(isValid)
@@ -73,12 +73,12 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
     </div>
   )
 }
+
 DiscountHandler.propTypes = {
   referralCode: PropTypes.string,
   originalTotal: PropTypes.number.isRequired,
   onDiscountApplied: PropTypes.func.isRequired
 }
-
 
 export default DiscountHandler
 
