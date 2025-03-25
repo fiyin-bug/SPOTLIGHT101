@@ -25,9 +25,12 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
         const validReferralCodes = [
           "DAMI", "STB", "CODEDTINS", "KINGTIFE01", "DARA", "ORE", "MONNIE", "GUS",
           "HXC", "FINNIE", "TUZO1960", "JIGGY1536", "VASTIFE", "VEENA", "NENYE",
-          "ZARA", "RYANXGABBY", "NXD", "KAMAL","MRMORALE53" ,"AZANAT", "MISHAEL007", "JOE4REAL",
+          "ZARA", "RYANXGABBY", "NXD", "KAMAL", "MRMORALE53", "MISHAEL007","AZANAT", "JOE4REAL",
         ];
-        return validReferralCodes.includes(value.trim().toUpperCase());
+        const trimmedUpperValue = value.trim().toUpperCase();
+        console.log("Validating referral code in ContactForm:", trimmedUpperValue);
+        console.log("Is in validReferralCodes?", validReferralCodes.includes(trimmedUpperValue));
+        return validReferralCodes.includes(trimmedUpperValue);
       }),
   });
 
@@ -36,6 +39,7 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
     setIsSubmitting(true);
 
     try {
+      console.log("Submitting contactDetails:", contactDetails);
       await contactSchema.validate(contactDetails, { abortEarly: false });
       onSubmit();
     } catch (validationError) {
@@ -77,7 +81,7 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
               name="firstName"
               type="text"
               placeholder="Enter your first name"
-              value={contactDetails.firstName}
+              value={contactDetails.firstName || ""}
               onChange={handleChange}
               className={`w-full p-3 bg-gray-900 border ${errors.firstName ? "border-red-500" : "border-gold"} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-gold`}
               required
@@ -94,7 +98,7 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
               name="lastName"
               type="text"
               placeholder="Enter your last name"
-              value={contactDetails.lastName}
+              value={contactDetails.lastName || ""}
               onChange={handleChange}
               className={`w-full p-3 bg-gray-900 border ${errors.lastName ? "border-red-500" : "border-gold"} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-gold`}
               required
@@ -112,7 +116,7 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
             name="email"
             type="email"
             placeholder="Enter your email"
-            value={contactDetails.email}
+            value={contactDetails.email || ""}
             onChange={handleChange}
             className={`w-full p-3 bg-gray-900 border ${errors.email ? "border-red-500" : "border-gold"} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-gold`}
             required
@@ -129,7 +133,7 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
             name="phone"
             type="tel"
             placeholder="Enter your phone number"
-            value={contactDetails.phone}
+            value={contactDetails.phone || ""}
             onChange={handleChange}
             className={`w-full p-3 bg-gray-900 border ${errors.phone ? "border-red-500" : "border-gold"} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-gold`}
             required
