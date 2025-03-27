@@ -25,7 +25,8 @@ function ContactForm({ contactDetails, setContactDetails, errors, setErrors, tim
         const validReferralCodes = [
           "DAMI", "STB", "CODEDTINS", "KINGTIFE01", "DARA", "ORE", "MONNIE", "GUS",
           "HXC", "FINNIE", "TUZO1960", "JIGGY1536", "VASTIFE", "VEENA", "NENYE",
-          "ZARA", "RYANXGABBY", "NXD", "KAMAL", "MRMORALE53", "MISHAEL007", "JOE4REAL",
+          "ZARA", "RYANXGABBY", "NXD", "KAMAL", "MRMORALE53", "MISHAEL007","AZANAT","JOE4REAL","NAGOD",
+          "VAST","ICEY","AYO", "BLACK",
         ];
         console.log("ContactForm validReferralCodes:", validReferralCodes); // Debug deployed list
         const trimmedUpperValue = value.trim().toUpperCase();
