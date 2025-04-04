@@ -36,6 +36,7 @@ function DiscountHandler({ referralCode, originalTotal, onDiscountApplied }) {
     "ICEY",
    "ADEDOYINPR",
     "AYO",
+    "DOYIN",
     "BLACK",
     
 
