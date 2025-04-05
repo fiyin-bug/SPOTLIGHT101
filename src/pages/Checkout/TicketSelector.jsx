@@ -43,7 +43,12 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onContinu
           >
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-medium text-white">{ticket.name}</h3>
+                <h3 className="text-lg font-medium text-white">
+                  {ticket.name}
+                  {ticket.id === "earlyBirdCount" && (
+                    <span className="ml-2 text-sm text-red-500 font-semibold">LIMITED TICKETS LEFT</span>
+                  )}
+                </h3>
                 <p className="text-gold font-bold">₦{formatPrice(ticket.price)}</p>
               </div>
 
@@ -91,6 +96,7 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onContinu
     </div>
   )
 }
+
 TicketSelector.propTypes = {
   ticketPrices: PropTypes.shape({
     earlyBird: PropTypes.number.isRequired,
@@ -106,5 +112,3 @@ TicketSelector.propTypes = {
 }
 
 export default TicketSelector;
-
-
