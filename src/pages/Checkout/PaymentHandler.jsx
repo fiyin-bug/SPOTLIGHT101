@@ -5,14 +5,11 @@ import * as Yup from "yup";
 import { CreditCard, ArrowLeft } from "lucide-react";
 import PropTypes from "prop-types";
 import axiosInstance from "../../utils/axiosInstance";
-import { v4 as uuidv4 } from "uuid";
 
 function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBack }) {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-
-  console.log("PaymentHandler props:", { contactDetails, ticketCounts, totalWithDiscount }); // Log props
 
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -31,20 +28,15 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   });
 
   const initializePayment = async () => {
-    console.log("Starting payment initialization");
     setIsProcessing(true);
     setPaymentError(null);
 
     try {
-      console.log("Validating contact details:", contactDetails);
       await contactSchema.validate(contactDetails, { abortEarly: false });
-      console.log("Contact validation passed");
 
-      console.log("Checking totalWithDiscount:", totalWithDiscount);
       if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
         throw new Error("Invalid payment amount.");
       }
-      console.log("Amount check passed");
 
       const tickets = {
         earlyBird: ticketCounts.earlyBirdCount,
@@ -55,48 +47,11 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
         vipTable10: ticketCounts.vipTable10Count,
       };
 
-      const totalTickets = Object.values(tickets).reduce((sum, count) => sum + count, 0);
-      console.log("Total tickets:", totalTickets);
-
-      const ticketData = {
-        eventName: "Spotlight",
-        firstName: contactDetails.firstName,
-        lastName: contactDetails.lastName,
-        email: contactDetails.email,
-        phone: contactDetails.phone,
-        referralCode: contactDetails.referralCode || null,
-        tickets,
-        price: totalWithDiscount,
-        ticketId: uuidv4(),
-      };
-
-      console.log("Sending ticket data:", ticketData);
-
-      const postResponse = await axiosInstance.post(
-        "https://spotlight-znvr.onrender.com/api/tickets/purchase",
-        ticketData
-      );
-      console.log("POST Response:", postResponse.data);
-
-      const ticketId = postResponse.data.ticketId;
-      if (!ticketId) {
-        console.error("No ticketId in response:", postResponse.data);
-        throw new Error("No ticket ID returned from server");
-      }
-      console.log("Extracted ticketId:", ticketId);
-
       const amountInKobo = Math.round(totalWithDiscount * 100);
-      console.log("Amount in kobo:", amountInKobo);
       const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-      console.log("Paystack reference:", paymentReference);
 
       const paystack = new PaystackPop();
-      console.log("Initializing Paystack with:", {
-        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
-        email: contactDetails.email,
-        amount: amountInKobo,
-        reference: paymentReference,
-      });
+
       paystack.newTransaction({
         key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
         email: contactDetails.email,
@@ -104,7 +59,6 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
         currency: "NGN",
         reference: paymentReference,
         metadata: {
-          ticketId,
           custom_fields: [
             {
               display_name: "Customer Name",
@@ -118,17 +72,31 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             },
           ],
         },
-        onSuccess: (paystackResponse) => {
-          console.log("Payment successful:", paystackResponse);
-          localStorage.removeItem("checkoutStep");
-          localStorage.removeItem("checkoutTimer");
-          localStorage.setItem("lastTransactionRef", paystackResponse.reference);
-          console.log("Navigating to:", `/ticket-details/${ticketId}`);
-          navigate(`/ticket-details/${ticketId}`);
-          console.log("Navigation triggered");
+        onSuccess: async (paystackResponse) => {
+          try {
+            const postResponse = await axiosInstance.post(
+              `https://spotlight-znvr.onrender.com/api/payments/pay/${paymentReference}`,
+              {
+                ...contactDetails,
+                tickets,
+                price: totalWithDiscount,
+                ticketId: `TICKET-${Date.now()}`,
+                eventName: "Spotlight",
+              }
+            );
+            if (postResponse.status === 200) {
+              navigate(`/ticket-details/${postResponse.data.ticket.ticketId}`);
+            } else {
+              setPaymentError("Payment verification failed. Please try again.");
+              setIsProcessing(false);
+            }
+          } catch (error) {
+            console.error("Payment verification error:", error.response?.data || error.message);
+            setPaymentError("Payment verification failed. Please try again.");
+            setIsProcessing(false);
+          }
         },
         onCancel: () => {
-          console.log("Payment cancelled");
           setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
           setIsProcessing(false);
         },
@@ -136,7 +104,6 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
     } catch (error) {
       console.error("Payment initialization error:", error.response?.data || error.message);
       if (error instanceof Yup.ValidationError) {
-        console.log("Validation errors:", error.errors);
         setPaymentError("Validation failed: " + error.errors.join(", "));
       } else {
         setPaymentError(error.response?.data?.error || "An error occurred during payment initialization.");
