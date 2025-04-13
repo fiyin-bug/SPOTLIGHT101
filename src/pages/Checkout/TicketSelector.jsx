@@ -1,35 +1,34 @@
-import { Plus, Minus, ArrowRight } from "lucide-react"
-import PropTypes from 'prop-types'
+import { Plus, Minus, ArrowRight } from "lucide-react";
+import PropTypes from "prop-types";
 
 function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onContinue }) {
-  const formatPrice = (price) => price.toLocaleString("en-NG")
+  const formatPrice = (price) => price.toLocaleString("en-NG");
 
   const handleIncrement = (type) => {
     setTicketCounts({
       ...ticketCounts,
       [type]: ticketCounts[type] + 1,
-    })
-  }
+    });
+  };
 
   const handleDecrement = (type) => {
     if (ticketCounts[type] > 0) {
       setTicketCounts({
         ...ticketCounts,
         [type]: ticketCounts[type] - 1,
-      })
+      });
     }
-  }
+  };
 
-  const totalTickets = Object.values(ticketCounts).reduce((sum, count) => sum + count, 0)
+  const totalTickets = Object.values(ticketCounts).reduce((sum, count) => sum + count, 0);
 
   const ticketTypes = [
-    { id: "earlyBirdCount", name: "Early Bird Ticket", price: ticketPrices.earlyBird },
-    { id: "regularCount", name: "Regular Ticket", price: ticketPrices.regular },
+    { id: "earlyBirdCount", name: "Regular Ticket", price: ticketPrices.earlyBird }, // Renamed Early Bird to Regular
     { id: "vipSoloCount", name: "VIP Solo", price: ticketPrices.vipSolo },
     { id: "vipTable5Count", name: "VIP Table of 5", price: ticketPrices.vipTable5 },
     { id: "vipTable7Count", name: "VIP Table of 7", price: ticketPrices.vipTable7 },
     { id: "vipTable10Count", name: "VIP Table of 10", price: ticketPrices.vipTable10 },
-  ]
+  ];
 
   return (
     <div className="w-full">
@@ -43,12 +42,7 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onContinu
           >
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-medium text-white">
-                  {ticket.name}
-                  {ticket.id === "earlyBirdCount" && (
-                    <span className="ml-2 text-sm text-red-500 font-semibold">LIMITED TICKETS LEFT</span>
-                  )}
-                </h3>
+                <h3 className="text-lg font-medium text-white">{ticket.name}</h3>
                 <p className="text-gold font-bold">₦{formatPrice(ticket.price)}</p>
               </div>
 
@@ -94,21 +88,20 @@ function TicketSelector({ ticketPrices, ticketCounts, setTicketCounts, onContinu
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 TicketSelector.propTypes = {
   ticketPrices: PropTypes.shape({
     earlyBird: PropTypes.number.isRequired,
-    regular: PropTypes.number.isRequired,
     vipSolo: PropTypes.number.isRequired,
     vipTable5: PropTypes.number.isRequired,
     vipTable7: PropTypes.number.isRequired,
-    vipTable10: PropTypes.number.isRequired
+    vipTable10: PropTypes.number.isRequired,
   }).isRequired,
   ticketCounts: PropTypes.object.isRequired,
   setTicketCounts: PropTypes.func.isRequired,
-  onContinue: PropTypes.func.isRequired
-}
+  onContinue: PropTypes.func.isRequired,
+};
 
 export default TicketSelector;
