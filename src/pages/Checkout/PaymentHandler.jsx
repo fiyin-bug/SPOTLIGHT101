@@ -49,65 +49,82 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             };
 
             const amountInKobo = Math.round(totalWithDiscount * 100);
-            const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
-            const paystack = new PaystackPop();
+            // 1. Get the Paystack reference from your backend
+            try {
+                const initializeResponse = await axiosInstance.post(
+                    "https://spotlight-znvr.onrender.com/api/payments/initialize",
+                    {
+                        amount: totalWithDiscount,
+                        email: contactDetails.email,
+                        // add any other data your backend needs
+                    }
+                );
 
-            paystack.newTransaction({
-                key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
-                email: contactDetails.email,
-                amount: amountInKobo,
-                currency: "NGN",
-                reference: paymentReference,
-                metadata: {
-                    custom_fields: [
-                        {
-                            display_name: "Customer Name",
-                            variable_name: "customer_name",
-                            value: `${contactDetails.firstName} ${contactDetails.lastName}`,
-                        },
-                        {
-                            display_name: "Phone Number",
-                            variable_name: "phone",
-                            value: contactDetails.phone,
-                        },
-                    ],
-                },
-                onSuccess: async (paystackResponse) => {
-                    try {
-                        console.log("Paystack success:", paystackResponse);
-                        const postResponse = await axiosInstance.post(
-                            `https://spotlight-znvr.onrender.com/api/payments/pay/${paystackResponse.reference}`,
+                const paymentReference = initializeResponse.data.reference;
+
+                const paystack = new PaystackPop();
+
+                paystack.newTransaction({
+                    key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
+                    email: contactDetails.email,
+                    amount: amountInKobo,
+                    currency: "NGN",
+                    reference: paymentReference,
+                    metadata: {
+                        custom_fields: [
                             {
-                                ...contactDetails,
-                                tickets,
-                                price: totalWithDiscount,
-                                ticketId: `TICKET-${Date.now()}`,
-                                eventName: "Spotlight",
-                            }
-                        );
-                        console.log("Backend response:", postResponse.data);
-                        if (postResponse.status === 200) {
-                            navigate(`/ticket-details/${postResponse.data.ticket.ticketId}`);
-                        } else {
+                                display_name: "Customer Name",
+                                variable_name: "customer_name",
+                                value: `${contactDetails.firstName} ${contactDetails.lastName}`,
+                            },
+                            {
+                                display_name: "Phone Number",
+                                variable_name: "phone",
+                                value: contactDetails.phone,
+                            },
+                        ],
+                    },
+                    onSuccess: async (paystackResponse) => {
+                        try {
+                            console.log("Paystack success:", paystackResponse);
+                            // 2. Verify the payment with your backend
+                            const postResponse = await axiosInstance.post(
+                                `https://spotlight-znvr.onrender.com/api/payments/pay/${paystackResponse.reference}`
+                            );
+                            console.log("Backend response:", postResponse.data);
+                            // 3. Create the ticket and redirect
+                            const ticketResponse = await axiosInstance.post(
+                                "https://spotlight-znvr.onrender.com/api/tickets/purchase",
+                                {
+                                    ...contactDetails,
+                                    tickets,
+                                    price: totalWithDiscount,
+                                    ticketId: postResponse.data.ticketId,
+                                    eventName: "Spotlight",
+                                }
+                            );
+                            navigate(`/ticket-details/${ticketResponse.data.ticketId}`);
+                        } catch (error) {
+                            console.error("Payment verification error:", {
+                                message: error.message,
+                                response: error.response?.data,
+                                status: error.response?.status,
+                            });
                             setPaymentError("Payment verification failed. Please try again.");
                             setIsProcessing(false);
                         }
-                    } catch (error) {
-                        console.error("Payment verification error:", {
-                            message: error.message,
-                            response: error.response?.data,
-                            status: error.response?.status,
-                        });
-                        setPaymentError("Payment verification failed. Please try again.");
+                    },
+                    onCancel: () => {
+                        setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
                         setIsProcessing(false);
-                    }
-                },
-                onCancel: () => {
-                    setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
-                    setIsProcessing(false);
-                },
-            });
+                    },
+                });
+            } catch (error) {
+                console.error("Paystack initialization error:", error.response?.data || error.message);
+                setPaymentError("Payment initialization failed. Please try again.");
+                setIsProcessing(false);
+            }
         } catch (error) {
             console.error("Payment initialization error:", error.response?.data || error.message);
             if (error instanceof Yup.ValidationError) {
