@@ -51,28 +51,6 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             const amountInKobo = Math.round(totalWithDiscount * 100);
             const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
-            // Send data to backend BEFORE Paystack payment
-            try {
-                const postResponse = await axiosInstance.post(
-                    `https://spotlight-znvr.onrender.com/api/payments/pay/${paymentReference}`,
-                    {
-                        ...contactDetails,
-                        tickets,
-                        price: totalWithDiscount,
-                        ticketId: `TICKET-${Date.now()}`,
-                        eventName: "Spotlight",
-                    }
-                );
-                if (postResponse.status !== 200) {
-                    throw new Error("Backend payment error");
-                }
-            } catch (error) {
-                console.error("Payment verification error:", error.response?.data || error.message);
-                setPaymentError("Payment verification failed. Please try again.");
-                setIsProcessing(false);
-                return; // Stop the payment if the backend post request fails.
-            }
-
             const paystack = new PaystackPop();
 
             paystack.newTransaction({
@@ -97,23 +75,30 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
                 },
                 onSuccess: async (paystackResponse) => {
                     try {
-                        const postResponse = await axiosInstance.get(
-                            `https://spotlight-znvr.onrender.com/api/tickets/purchases`
-                        );
-                        if (postResponse.status === 200) {
-                            const ticket = postResponse.data.find(ticket => ticket.transactionRef === paymentReference);
-                            if(ticket){
-                              navigate(`/ticket-details/${ticket.ticketId}`);
-                            } else {
-                              setPaymentError("Payment verification failed. Please try again.");
-                              setIsProcessing(false);
+                        console.log("Paystack success:", paystackResponse);
+                        const postResponse = await axiosInstance.post(
+                            `https://spotlight-znvr.onrender.com/api/payments/pay/${paystackResponse.reference}`,
+                            {
+                                ...contactDetails,
+                                tickets,
+                                price: totalWithDiscount,
+                                ticketId: `TICKET-${Date.now()}`,
+                                eventName: "Spotlight",
                             }
+                        );
+                        console.log("Backend response:", postResponse.data);
+                        if (postResponse.status === 200) {
+                            navigate(`/ticket-details/${postResponse.data.ticket.ticketId}`);
                         } else {
                             setPaymentError("Payment verification failed. Please try again.");
                             setIsProcessing(false);
                         }
                     } catch (error) {
-                        console.error("Payment verification error:", error.response?.data || error.message);
+                        console.error("Payment verification error:", {
+                            message: error.message,
+                            response: error.response?.data,
+                            status: error.response?.status,
+                        });
                         setPaymentError("Payment verification failed. Please try again.");
                         setIsProcessing(false);
                     }
