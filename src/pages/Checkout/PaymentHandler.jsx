@@ -181,4 +181,3 @@ PaymentHandler.propTypes = {
   onBack: PropTypes.func.isRequired,
 };
 
-export default PaymentHandler;
