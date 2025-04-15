@@ -53,7 +53,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
       const paystack = new PaystackPop();
 
       paystack.newTransaction({
-        key: " pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
+        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
