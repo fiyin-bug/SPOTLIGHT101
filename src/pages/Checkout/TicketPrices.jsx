@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 
 // Mock ticket prices - in a real app, you would fetch these from an API
 const mockPrices = {
-  earlyBird: 10800,
+  earlyBird: 108, // Changed from 10800 to 108 NGN
   regular: 20000,
   vipSolo: 50000,
   vipTable5: 500000,
@@ -20,10 +20,6 @@ function TicketPrices() {
     const fetchTicketPrices = async () => {
       setLoading(true)
       try {
-        // In a real app, you would fetch from an API
-        // const response = await fetch('/api/ticket-prices');
-        // const data = await response.json();
-
         // Simulate API delay
         await new Promise((resolve) => setTimeout(resolve, 500))
 
@@ -61,4 +57,3 @@ function TicketPrices() {
 }
 
 export default TicketPrices
-
