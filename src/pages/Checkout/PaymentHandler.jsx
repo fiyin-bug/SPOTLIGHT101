@@ -93,13 +93,13 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
 
       const paystack = new PaystackPop();
       console.log("Initializing Paystack with:", {
-        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
+        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
         email: contactDetails.email,
         amount: amountInKobo,
         reference: paymentReference,
       });
       paystack.newTransaction({
-        key: "pk_test_eac5caa01b523bb1eaf0743124649eeace5f75a7",
+        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
