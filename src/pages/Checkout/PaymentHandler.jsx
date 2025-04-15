@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { CreditCard, ArrowLeft } from "lucide-react";
 import PropTypes from "prop-types";
 import axiosInstance from "../../utils/axiosInstance";
+import { v4 as uuidv4 } from "uuid";
 
 function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBack }) {
     const navigate = useNavigate();
@@ -13,18 +14,10 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
     const [paymentError, setPaymentError] = useState(null);
 
     const contactSchema = Yup.object().shape({
-        firstName: Yup.string()
-            .required("First Name is required")
-            .matches(/^[A-Za-z]+$/, "First Name should contain only letters"),
-        lastName: Yup.string()
-            .required("Last Name is required")
-            .matches(/^[A-Za-z]+$/, "Last Name should contain only letters"),
+        firstName: Yup.string().required("First Name is required").matches(/^[A-Za-z]+$/, "First Name should contain only letters"),
+        lastName: Yup.string().required("Last Name is required").matches(/^[A-Za-z]+$/, "Last Name should contain only letters"),
         email: Yup.string().email("Invalid email address").required("Email is required"),
-        phone: Yup.string()
-            .required("Phone Number is required")
-            .matches(/^[0-9]+$/, "Phone Number should contain only numbers")
-            .min(10, "Phone Number must be at least 10 digits")
-            .max(15, "Phone Number must be at most 15 digits"),
+        phone: Yup.string().required("Phone Number is required").matches(/^[0-9]+$/, "Phone Number should contain only numbers").min(10, "Phone Number must be at least 10 digits").max(15, "Phone Number must be at most 15 digits"),
         referralCode: Yup.string().nullable(),
     });
 
@@ -34,7 +27,6 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
 
         try {
             await contactSchema.validate(contactDetails, { abortEarly: false });
-
             if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
                 throw new Error("Invalid payment amount.");
             }
@@ -48,83 +40,55 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
                 vipTable10: ticketCounts.vipTable10Count,
             };
 
+            const ticketId = uuidv4(); // Generate ticketId before payment
             const amountInKobo = Math.round(totalWithDiscount * 100);
+            const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
-            // 1. Get the Paystack reference from your backend
-            try {
-                const initializeResponse = await axiosInstance.post(
-                    "https://spotlight-znvr.onrender.com/api/payments/initialize",
-                    {
-                        amount: totalWithDiscount,
-                        email: contactDetails.email,
-                        // add any other data your backend needs
-                    }
-                );
+            const paystack = new PaystackPop();
+            paystack.newTransaction({
+                key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
+                email: contactDetails.email,
+                amount: amountInKobo,
+                currency: "NGN",
+                reference: paymentReference,
+                metadata: {
+                    ticketId, // Include ticketId in metadata
+                    custom_fields: [
+                        { display_name: "Customer Name", variable_name: "customer_name", value: `${contactDetails.firstName} ${contactDetails.lastName}` },
+                        { display_name: "Phone Number", variable_name: "phone", value: contactDetails.phone },
+                    ],
+                },
+                onSuccess: async (paystackResponse) => {
+                    try {
+                        const ticketData = {
+                            eventName: "Spotlight",
+                            firstName: contactDetails.firstName,
+                            lastName: contactDetails.lastName,
+                            email: contactDetails.email,
+                            phone: contactDetails.phone,
+                            referralCode: contactDetails.referralCode || null,
+                            tickets,
+                            price: totalWithDiscount,
+                            ticketId: ticketId, // Use the generated ticketId
+                        };
 
-                const paymentReference = initializeResponse.data.reference;
+                        const postResponse = await axiosInstance.post("https://spotlight-znvr.onrender.com/api/tickets/purchase", ticketData);
 
-                const paystack = new PaystackPop();
-
-                paystack.newTransaction({
-                    key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
-                    email: contactDetails.email,
-                    amount: amountInKobo,
-                    currency: "NGN",
-                    reference: paymentReference,
-                    metadata: {
-                        custom_fields: [
-                            {
-                                display_name: "Customer Name",
-                                variable_name: "customer_name",
-                                value: `${contactDetails.firstName} ${contactDetails.lastName}`,
-                            },
-                            {
-                                display_name: "Phone Number",
-                                variable_name: "phone",
-                                value: contactDetails.phone,
-                            },
-                        ],
-                    },
-                    onSuccess: async (paystackResponse) => {
-                        try {
-                            console.log("Paystack success:", paystackResponse);
-                            // 2. Verify the payment with your backend
-                            const postResponse = await axiosInstance.post(
-                                `https://spotlight-znvr.onrender.com/api/payments/pay/${paystackResponse.reference}`
-                            );
-                            console.log("Backend response:", postResponse.data);
-                            // 3. Create the ticket and redirect
-                            const ticketResponse = await axiosInstance.post(
-                                "https://spotlight-znvr.onrender.com/api/tickets/purchase",
-                                {
-                                    ...contactDetails,
-                                    tickets,
-                                    price: totalWithDiscount,
-                                    ticketId: postResponse.data.ticketId,
-                                    eventName: "Spotlight",
-                                }
-                            );
-                            navigate(`/ticket-details/${ticketResponse.data.ticketId}`);
-                        } catch (error) {
-                            console.error("Payment verification error:", {
-                                message: error.message,
-                                response: error.response?.data,
-                                status: error.response?.status,
-                            });
-                            setPaymentError("Payment verification failed. Please try again.");
-                            setIsProcessing(false);
-                        }
-                    },
-                    onCancel: () => {
-                        setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
+                        localStorage.removeItem("checkoutStep");
+                        localStorage.removeItem("checkoutTimer");
+                        localStorage.setItem("lastTransactionRef", paystackResponse.reference);
+                        navigate(`/ticket-details/${ticketId}`);
+                    } catch (ticketCreationError) {
+                        console.error("Ticket creation error:", ticketCreationError.response?.data || ticketCreationError.message);
+                        setPaymentError("Payment successful, but ticket creation failed. Please contact support.");
                         setIsProcessing(false);
-                    },
-                });
-            } catch (error) {
-                console.error("Paystack initialization error:", error.response?.data || error.message);
-                setPaymentError("Payment initialization failed. Please try again.");
-                setIsProcessing(false);
-            }
+                    }
+                },
+                onCancel: () => {
+                    setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
+                    setIsProcessing(false);
+                },
+            });
         } catch (error) {
             console.error("Payment initialization error:", error.response?.data || error.message);
             if (error instanceof Yup.ValidationError) {
