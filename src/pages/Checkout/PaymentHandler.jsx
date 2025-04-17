@@ -12,7 +12,6 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
 
-  // Validation schema for contact details
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
       .required("First Name is required")
@@ -29,7 +28,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
     referralCode: Yup.string().nullable(),
   });
 
-  const initializePayment = async () => {
+  const initializePaystack = async () => {
     setIsProcessing(true);
     setPaymentError(null);
 
@@ -37,54 +36,24 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
       // Validate contact details
       await contactSchema.validate(contactDetails, { abortEarly: false });
 
-      // Validate total amount
+      // Ensure totalWithDiscount is a valid number
       if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
-        throw new Error("Invalid payment amount.");
+        throw new Error("Invalid payment amount: totalWithDiscount must be a valid number greater than 0.");
       }
 
-      // Prepare ticket data
-      const tickets = {
-        earlyBird: ticketCounts.earlyBirdCount,
-        regular: ticketCounts.regularCount,
-        vipSolo: ticketCounts.vipSoloCount,
-        vipTable5: ticketCounts.vipTable5Count,
-        vipTable7: ticketCounts.vipTable7Count,
-        vipTable10: ticketCounts.vipTable10Count,
-      };
+      const amountInKobo = Math.round(totalWithDiscount * 100); // Convert to kobo
 
-      // Validate ticket counts
-      const isValidTicketCounts = Object.values(tickets).every(
-        (count) => typeof count === "number" && count >= 0
-      );
-      if (!isValidTicketCounts) {
-        throw new Error("Invalid ticket counts.");
-      }
-
-      const ticketData = {
-        eventName: "Spotlight",
-        firstName: contactDetails.firstName,
-        lastName: contactDetails.lastName,
-        email: contactDetails.email,
-        phone: contactDetails.phone,
-        referralCode: contactDetails.referralCode || null,
-        tickets,
-        price: totalWithDiscount,
-        ticketId: uuidv4(),
-      };
-
-      // Prepare Paystack payment
-      const amountInKobo = Math.round(parseFloat(totalWithDiscount.toFixed(2)) * 100);
-      const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+      // Generate a unique reference for Paystack (optional, Paystack can generate one)
+      const reference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
       const paystack = new PaystackPop();
       paystack.newTransaction({
-        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d", // TODO: Move to process.env.REACT_APP_PAYSTACK_KEY
+        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d", // Replace with your actual live key
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
-        reference: paymentReference,
+        reference, // Use the generated reference or let Paystack create one
         metadata: {
-          ticketId: ticketData.ticketId,
           custom_fields: [
             {
               display_name: "Customer Name",
@@ -98,37 +67,47 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             },
           ],
         },
-        onSuccess: async (paystackResponse) => {
+        onSuccess: async (response) => {
+          console.log("Payment successful:", response);
+          setIsProcessing(false);
+
+          const ticketDataToSend = {
+            firstName: contactDetails.firstName,
+            lastName: contactDetails.lastName,
+            email: contactDetails.email,
+            phone: contactDetails.phone,
+            referralCode: contactDetails.referralCode || null,
+            tickets: ticketCounts,
+            price: totalWithDiscount,
+            ticketId: uuidv4(), // Generate a ticket ID on the frontend
+            paymentReference: response.reference, // Send the Paystack reference for verification
+            eventName: "Spotlight", // Or dynamically set your event name
+          };
+
           try {
-            // Send ticket purchase request after payment success
             const postResponse = await axiosInstance.post(
               "https://spotlight-znvr.onrender.com/api/tickets/purchase",
-              {
-                ...ticketData,
-                paymentReference: paystackResponse.reference, // For server-side verification
-              },
-              { timeout: 10000 } // Add timeout for API call
+              ticketDataToSend,
+              { timeout: 10000 }
             );
-
-            const ticketId = postResponse.data.ticketId;
-            if (!ticketId) {
-              throw new Error("No ticket ID returned from server");
+            console.log("Backend ticket purchase response:", postResponse.data);
+            const ticketId = postResponse.data?.ticketId;
+            if (ticketId) {
+              localStorage.removeItem("checkoutStep");
+              localStorage.removeItem("checkoutTimer");
+              localStorage.setItem("lastTransactionRef", response.reference);
+              navigate(`/ticket-details/${ticketId}`);
+            } else {
+              console.error("No ticket ID received from backend");
+              setPaymentError("Failed to retrieve ticket details.");
             }
-
-            // Clean up local storage and navigate
-            ["checkoutStep", "checkoutTimer"].forEach((key) => localStorage.removeItem(key));
-            localStorage.setItem("lastTransactionRef", paystackResponse.reference);
-            navigate(`/ticket-details/${ticketId}`);
           } catch (error) {
-            // Handle failure to issue ticket after payment
-            const errorMessage =
-              error.response?.data?.error ||
-              error.message === "Network Error"
-                ? "Unable to connect to the server. Please contact support at support@spotlight.com."
-                : "Payment succeeded, but ticket issuance failed. Please contact support at support@spotlight.com.";
-            setPaymentError(errorMessage);
+            console.error("Error sending ticket data to backend:", error);
+            setPaymentError(
+              error.response?.data?.error || "An error occurred while processing your ticket."
+            );
+          } finally {
             setIsProcessing(false);
-            console.error("Ticket purchase error after payment:", error);
           }
         },
         onCancel: () => {
@@ -137,13 +116,8 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
         },
       });
     } catch (error) {
-      // Handle validation or initialization errors
       console.error("Payment initialization error:", error);
-      if (error instanceof Yup.ValidationError) {
-        setPaymentError("Validation failed: " + error.errors.join(", "));
-      } else {
-        setPaymentError(error.message || "An error occurred during payment initialization.");
-      }
+      setPaymentError(error.message || "An error occurred during payment initialization.");
       setIsProcessing(false);
     }
   };
@@ -193,7 +167,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
           </button>
           <button
             className="px-6 py-3 bg-gold text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-            onClick={initializePayment}
+            onClick={initializePaystack}
             disabled={isProcessing}
           >
             {isProcessing ? "Processing..." : "Pay Now"}
@@ -212,14 +186,7 @@ PaymentHandler.propTypes = {
     phone: PropTypes.string.isRequired,
     referralCode: PropTypes.string,
   }).isRequired,
-  ticketCounts: PropTypes.shape({
-    earlyBirdCount: PropTypes.number.isRequired,
-    regularCount: PropTypes.number.isRequired,
-    vipSoloCount: PropTypes.number.isRequired,
-    vipTable5Count: PropTypes.number.isRequired,
-    vipTable7Count: PropTypes.number.isRequired,
-    vipTable10Count: PropTypes.number.isRequired,
-  }).isRequired,
+  ticketCounts: PropTypes.object.isRequired,
   totalWithDiscount: PropTypes.number.isRequired,
   onBack: PropTypes.func.isRequired,
 };
