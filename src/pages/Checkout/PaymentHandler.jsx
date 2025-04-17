@@ -13,8 +13,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
 
-  console.log("PaymentHandler props:", { contactDetails, ticketCounts, totalWithDiscount }); // Log props
-
+  // Validation schema for contact details
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
       .required("First Name is required")
@@ -32,21 +31,19 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   });
 
   const initializePayment = async () => {
-    console.log("Starting payment initialization");
     setIsProcessing(true);
     setPaymentError(null);
 
     try {
-      console.log("Validating contact details:", contactDetails);
+      // Validate contact details
       await contactSchema.validate(contactDetails, { abortEarly: false });
-      console.log("Contact validation passed");
 
-      console.log("Checking totalWithDiscount:", totalWithDiscount);
+      // Validate total amount
       if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
         throw new Error("Invalid payment amount.");
       }
-      console.log("Amount check passed");
 
+      // Prepare ticket data
       const tickets = {
         earlyBird: ticketCounts.earlyBirdCount,
         regular: ticketCounts.regularCount,
@@ -56,8 +53,13 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
         vipTable10: ticketCounts.vipTable10Count,
       };
 
-      const totalTickets = Object.values(tickets).reduce((sum, count) => sum + count, 0);
-      console.log("Total tickets:", totalTickets);
+      // Validate ticket counts
+      const isValidTicketCounts = Object.values(tickets).every(
+        (count) => typeof count === "number" && count >= 0
+      );
+      if (!isValidTicketCounts) {
+        throw new Error("Invalid ticket counts.");
+      }
 
       const ticketData = {
         eventName: "Spotlight",
@@ -71,41 +73,19 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
         ticketId: uuidv4(),
       };
 
-      console.log("Sending ticket data:", ticketData);
-
-      const postResponse = await axiosInstance.post(
-        "https://spotlight-znvr.onrender.com/api/tickets/purchase",
-        ticketData
-      );
-      console.log("POST Response:", postResponse.data);
-
-      const ticketId = postResponse.data.ticketId;
-      if (!ticketId) {
-        console.error("No ticketId in response:", postResponse.data);
-        throw new Error("No ticket ID returned from server");
-      }
-      console.log("Extracted ticketId:", ticketId);
-
-      const amountInKobo = Math.round(totalWithDiscount * 100);
-      console.log("Amount in kobo:", amountInKobo);
+      // Prepare Paystack payment
+      const amountInKobo = Math.round(parseFloat(totalWithDiscount.toFixed(2)) * 100);
       const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-      console.log("Paystack reference:", paymentReference);
 
       const paystack = new PaystackPop();
-      console.log("Initializing Paystack with:", {
-        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
-        email: contactDetails.email,
-        amount: amountInKobo,
-        reference: paymentReference,
-      });
       paystack.newTransaction({
-        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
+        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d", // TODO: Move to process.env.REACT_APP_PAYSTACK_KEY
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
         reference: paymentReference,
         metadata: {
-          ticketId,
+          ticketId: ticketData.ticketId,
           custom_fields: [
             {
               display_name: "Customer Name",
@@ -119,100 +99,46 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             },
           ],
         },
-        onSuccess: (paystackResponse) => {
-          console.log("Payment successful:", paystackResponse);
-          localStorage.removeItem("checkoutStep");
-          localStorage.removeItem("checkoutTimer");
-          localStorage.setItem("lastTransactionRef", paystackResponse.reference);
-          console.log("Navigating to:", `/ticket-details/${ticketId}`);
-          navigate(`/ticket-details/${ticketId}`);
-          console.log("Navigation triggered");
+        onSuccess: async (paystackResponse) => {
+          try {
+            // Send ticket purchase request after payment success
+            const postResponse = await axiosInstance.post(
+              "https://spotlight-znvr.onrender.com/api/tickets/purchase",
+              {
+                ...ticketData,
+                paymentReference: paystackResponse.reference, // For server-side verification
+              },
+              { timeout: 10000 } // Add timeout for API call
+            );
+
+            const ticketId = postResponse.data.ticketId;
+            if (!ticketId) {
+              throw new Error("No ticket ID returned from server");
+            }
+
+            // Clean up local storage and navigate
+            ["checkoutStep", "checkoutTimer"].forEach((key) => localStorage.removeItem(key));
+            localStorage.setItem("lastTransactionRef", paystackResponse.reference);
+            navigate(`/ticket-details/${ticketId}`);
+          } catch (error) {
+            // Handle failure to issue ticket after payment
+            const errorMessage =
+              error.response?.data?.error ||
+              error.message === "Network Error"
+                ? "Unable to connect to the server. Please contact support at support@spotlight.com."
+                : "Payment succeeded, but ticket issuance failed. Please contact support at support@spotlight.com.";
+            setPaymentError(errorMessage);
+            setIsProcessing(false);
+            console.error("Ticket purchase error after payment:", error);
+          }
         },
         onCancel: () => {
-          console.log("Payment cancelled");
           setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
           setIsProcessing(false);
         },
       });
     } catch (error) {
-      console.error("Payment initialization error:", error.response?.data || error.message);
+      // Handle validation or initialization errors
+      console.error("Payment initialization error:", error);
       if (error instanceof Yup.ValidationError) {
-        console.log("Validation errors:", error.errors);
-        setPaymentError("Validation failed: " + error.errors.join(", "));
-      } else {
-        setPaymentError(error.response?.data?.error || "An error occurred during payment initialization.");
-      }
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <div className="w-full">
-      <h2 className="text-2xl font-bold text-white mb-6">Complete Your Payment</h2>
-      <div className="bg-gray-900 p-6 rounded-lg border border-gold mb-6">
-        <div className="flex items-center mb-4">
-          <CreditCard className="h-6 w-6 text-gold mr-2" />
-          <h3 className="text-lg font-medium text-white">Payment Information</h3>
-        </div>
-        <p className="text-gray-300 mb-4">
-          You're about to purchase tickets for the concert. Click the button below to proceed with your payment securely
-          via Paystack.
-        </p>
-        <div className="bg-black bg-opacity-50 p-4 rounded-lg mb-4">
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-400">Name:</span>
-            <span className="text-white">
-              {contactDetails.firstName} {contactDetails.lastName}
-            </span>
-          </div>
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-400">Email:</span>
-            <span className="text-white">{contactDetails.email}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">Amount:</span>
-            <span className="text-gold font-bold">₦{totalWithDiscount.toLocaleString("en-NG")}</span>
-          </div>
-        </div>
-        {paymentError && (
-          <div className="bg-red-900 bg-opacity-30 border border-red-500 text-red-200 p-4 rounded-lg mb-4">
-            {paymentError}
-          </div>
-        )}
-        <div className="flex justify-between mt-6">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex items-center px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
-            disabled={isProcessing}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </button>
-          <button
-            className="px-6 py-3 bg-gold text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-            onClick={initializePayment}
-            disabled={isProcessing}
-          >
-            {isProcessing ? "Processing..." : "Pay Now"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-PaymentHandler.propTypes = {
-  contactDetails: PropTypes.shape({
-    firstName: PropTypes.string.isRequired,
-    lastName: PropTypes.string.isRequired,
-    email: PropTypes.string.isRequired,
-    phone: PropTypes.string.isRequired,
-    referralCode: PropTypes.string,
-  }).isRequired,
-  ticketCounts: PropTypes.object.isRequired,
-  totalWithDiscount: PropTypes.number.isRequired,
-  onBack: PropTypes.func.isRequired,
-};
-
-export default PaymentHandler;
+        set​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​
