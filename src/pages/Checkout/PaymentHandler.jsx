@@ -77,14 +77,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             email: contactDetails.email,
             phone: contactDetails.phone,
             referralCode: contactDetails.referralCode || null,
-            tickets: {
-              earlyBird: ticketCounts.earlyBirdCount,
-              regular: ticketCounts.regularCount,
-              vipSolo: ticketCounts.vipSoloCount,
-              vipTable5: ticketCounts.vipTable5Count,
-              vipTable7: ticketCounts.vipTable7Count,
-              vipTable10: ticketCounts.vipTable10Count,
-            },
+            tickets: ticketCounts,
             price: totalWithDiscount,
             ticketId: uuidv4(), // Generate a ticket ID on the frontend
             paymentReference: response.reference, // Send the Paystack reference for verification
