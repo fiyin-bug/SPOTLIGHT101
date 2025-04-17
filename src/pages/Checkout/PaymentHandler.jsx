@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaystackPop from "@paystack/inline-js";
 import * as Yup from "yup";
@@ -141,4 +140,88 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
       // Handle validation or initialization errors
       console.error("Payment initialization error:", error);
       if (error instanceof Yup.ValidationError) {
-        set​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​
+        setPaymentError("Validation failed: " + error.errors.join(", "));
+      } else {
+        setPaymentError(error.message || "An error occurred during payment initialization.");
+      }
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="w-full">
+      <h2 className="text-2xl font-bold text-white mb-6">Complete Your Payment</h2>
+      <div className="bg-gray-900 p-6 rounded-lg border border-gold mb-6">
+        <div className="flex items-center mb-4">
+          <CreditCard className="h-6 w-6 text-gold mr-2" />
+          <h3 className="text-lg font-medium text-white">Payment Information</h3>
+        </div>
+        <p className="text-gray-300 mb-4">
+          You're about to purchase tickets for the concert. Click the button below to proceed with your payment securely
+          via Paystack.
+        </p>
+        <div className="bg-black bg-opacity-50 p-4 rounded-lg mb-4">
+          <div className="flex justify-between mb-2">
+            <span className="text-gray-400">Name:</span>
+            <span className="text-white">
+              {contactDetails.firstName} {contactDetails.lastName}
+            </span>
+          </div>
+          <div className="flex justify-between mb-2">
+            <span className="text-gray-400">Email:</span>
+            <span className="text-white">{contactDetails.email}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-400">Amount:</span>
+            <span className="text-gold font-bold">₦{totalWithDiscount.toLocaleString("en-NG")}</span>
+          </div>
+        </div>
+        {paymentError && (
+          <div className="bg-red-900 bg-opacity-30 border border-red-500 text-red-200 p-4 rounded-lg mb-4">
+            {paymentError}
+          </div>
+        )}
+        <div className="flex justify-between mt-6">
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
+            disabled={isProcessing}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </button>
+          <button
+            className="px-6 py-3 bg-gold text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+            onClick={initializePayment}
+            disabled={isProcessing}
+          >
+            {isProcessing ? "Processing..." : "Pay Now"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+PaymentHandler.propTypes = {
+  contactDetails: PropTypes.shape({
+    firstName: PropTypes.string.isRequired,
+    lastName: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+    phone: PropTypes.string.isRequired,
+    referralCode: PropTypes.string,
+  }).isRequired,
+  ticketCounts: PropTypes.shape({
+    earlyBirdCount: PropTypes.number.isRequired,
+    regularCount: PropTypes.number.isRequired,
+    vipSoloCount: PropTypes.number.isRequired,
+    vipTable5Count: PropTypes.number.isRequired,
+    vipTable7Count: PropTypes.number.isRequired,
+    vipTable10Count: PropTypes.number.isRequired,
+  }).isRequired,
+  totalWithDiscount: PropTypes.number.isRequired,
+  onBack: PropTypes.func.isRequired,
+};
+
+export default PaymentHandler;
