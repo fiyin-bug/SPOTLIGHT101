@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaystackPop from "@paystack/inline-js";
@@ -12,8 +11,6 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-
-  console.log("PaymentHandler props:", { contactDetails, ticketCounts, totalWithDiscount }); // Log props
 
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -31,81 +28,32 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
     referralCode: Yup.string().nullable(),
   });
 
-  const initializePayment = async () => {
-    console.log("Starting payment initialization");
+  const initializePaystack = async () => {
     setIsProcessing(true);
     setPaymentError(null);
 
     try {
-      console.log("Validating contact details:", contactDetails);
+      // Validate contact details
       await contactSchema.validate(contactDetails, { abortEarly: false });
-      console.log("Contact validation passed");
 
-      console.log("Checking totalWithDiscount:", totalWithDiscount);
+      // Ensure totalWithDiscount is a valid number
       if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
-        throw new Error("Invalid payment amount.");
+        throw new Error("Invalid payment amount: totalWithDiscount must be a valid number greater than 0.");
       }
-      console.log("Amount check passed");
 
-      const tickets = {
-        earlyBird: ticketCounts.earlyBirdCount,
-        regular: ticketCounts.regularCount,
-        vipSolo: ticketCounts.vipSoloCount,
-        vipTable5: ticketCounts.vipTable5Count,
-        vipTable7: ticketCounts.vipTable7Count,
-        vipTable10: ticketCounts.vipTable10Count,
-      };
+      const amountInKobo = Math.round(totalWithDiscount * 100); // Convert to kobo
 
-      const totalTickets = Object.values(tickets).reduce((sum, count) => sum + count, 0);
-      console.log("Total tickets:", totalTickets);
-
-      const ticketData = {
-        eventName: "Spotlight",
-        firstName: contactDetails.firstName,
-        lastName: contactDetails.lastName,
-        email: contactDetails.email,
-        phone: contactDetails.phone,
-        referralCode: contactDetails.referralCode || null,
-        tickets,
-        price: totalWithDiscount,
-        ticketId: uuidv4(),
-      };
-
-      console.log("Sending ticket data:", ticketData);
-
-      const postResponse = await axiosInstance.post(
-        "https://spotlight-znvr.onrender.com/api/tickets/purchase",
-        ticketData
-      );
-      console.log("POST Response:", postResponse.data);
-
-      const ticketId = postResponse.data.ticketId;
-      if (!ticketId) {
-        console.error("No ticketId in response:", postResponse.data);
-        throw new Error("No ticket ID returned from server");
-      }
-      console.log("Extracted ticketId:", ticketId);
-
-      const amountInKobo = Math.round(totalWithDiscount * 100);
-      console.log("Amount in kobo:", amountInKobo);
-      const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-      console.log("Paystack reference:", paymentReference);
+      // Generate a unique reference for Paystack (optional, Paystack can generate one)
+      const reference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
       const paystack = new PaystackPop();
-      console.log("Initializing Paystack with:", {
-        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
-        email: contactDetails.email,
-        amount: amountInKobo,
-        reference: paymentReference,
-      });
       paystack.newTransaction({
-        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
+        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d", // Replace with your actual live key
         email: contactDetails.email,
         amount: amountInKobo,
         currency: "NGN",
-        reference: paymentReference,
+        reference, // Use the generated reference or let Paystack create one
         metadata: {
-          ticketId,
           custom_fields: [
             {
               display_name: "Customer Name",
@@ -119,29 +67,64 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
             },
           ],
         },
-        onSuccess: (paystackResponse) => {
-          console.log("Payment successful:", paystackResponse);
-          localStorage.removeItem("checkoutStep");
-          localStorage.removeItem("checkoutTimer");
-          localStorage.setItem("lastTransactionRef", paystackResponse.reference);
-          console.log("Navigating to:", `/ticket-details/${ticketId}`);
-          navigate(`/ticket-details/${ticketId}`);
-          console.log("Navigation triggered");
+        onSuccess: async (response) => {
+          console.log("Payment successful:", response);
+          setIsProcessing(false);
+
+          const ticketDataToSend = {
+            firstName: contactDetails.firstName,
+            lastName: contactDetails.lastName,
+            email: contactDetails.email,
+            phone: contactDetails.phone,
+            referralCode: contactDetails.referralCode || null,
+            tickets: {
+              earlyBird: ticketCounts.earlyBirdCount,
+              regular: ticketCounts.regularCount,
+              vipSolo: ticketCounts.vipSoloCount,
+              vipTable5: ticketCounts.vipTable5Count,
+              vipTable7: ticketCounts.vipTable7Count,
+              vipTable10: ticketCounts.vipTable10Count,
+            },
+            price: totalWithDiscount,
+            ticketId: uuidv4(), // Generate a ticket ID on the frontend
+            paymentReference: response.reference, // Send the Paystack reference for verification
+            eventName: "Spotlight", // Or dynamically set your event name
+          };
+
+          try {
+            const postResponse = await axiosInstance.post(
+              "https://spotlight-znvr.onrender.com/api/tickets/purchase",
+              ticketDataToSend,
+              { timeout: 10000 }
+            );
+            console.log("Backend ticket purchase response:", postResponse.data);
+            const ticketId = postResponse.data?.ticketId;
+            if (ticketId) {
+              localStorage.removeItem("checkoutStep");
+              localStorage.removeItem("checkoutTimer");
+              localStorage.setItem("lastTransactionRef", response.reference);
+              navigate(`/ticket-details/${ticketId}`);
+            } else {
+              console.error("No ticket ID received from backend");
+              setPaymentError("Failed to retrieve ticket details.");
+            }
+          } catch (error) {
+            console.error("Error sending ticket data to backend:", error);
+            setPaymentError(
+              error.response?.data?.error || "An error occurred while processing your ticket."
+            );
+          } finally {
+            setIsProcessing(false);
+          }
         },
         onCancel: () => {
-          console.log("Payment cancelled");
           setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
           setIsProcessing(false);
         },
       });
     } catch (error) {
-      console.error("Payment initialization error:", error.response?.data || error.message);
-      if (error instanceof Yup.ValidationError) {
-        console.log("Validation errors:", error.errors);
-        setPaymentError("Validation failed: " + error.errors.join(", "));
-      } else {
-        setPaymentError(error.response?.data?.error || "An error occurred during payment initialization.");
-      }
+      console.error("Payment initialization error:", error);
+      setPaymentError(error.message || "An error occurred during payment initialization.");
       setIsProcessing(false);
     }
   };
@@ -191,7 +174,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
           </button>
           <button
             className="px-6 py-3 bg-gold text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-            onClick={initializePayment}
+            onClick={initializePaystack}
             disabled={isProcessing}
           >
             {isProcessing ? "Processing..." : "Pay Now"}
