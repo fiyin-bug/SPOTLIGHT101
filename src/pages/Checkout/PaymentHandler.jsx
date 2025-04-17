@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaystackPop from "@paystack/inline-js";
@@ -11,6 +12,8 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
+
+  console.log("PaymentHandler props:", { contactDetails, ticketCounts, totalWithDiscount }); // Log props
 
   const contactSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -28,101 +31,117 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
     referralCode: Yup.string().nullable(),
   });
 
-  const processPayment = async () => {
+  const initializePayment = async () => {
+    console.log("Starting payment initialization");
     setIsProcessing(true);
     setPaymentError(null);
 
     try {
-      // Validate contact details
+      console.log("Validating contact details:", contactDetails);
       await contactSchema.validate(contactDetails, { abortEarly: false });
+      console.log("Contact validation passed");
 
-      const ticketDataToSend = {
+      console.log("Checking totalWithDiscount:", totalWithDiscount);
+      if (typeof totalWithDiscount !== "number" || totalWithDiscount <= 0) {
+        throw new Error("Invalid payment amount.");
+      }
+      console.log("Amount check passed");
+
+      const tickets = {
+        earlyBird: ticketCounts.earlyBirdCount,
+        regular: ticketCounts.regularCount,
+        vipSolo: ticketCounts.vipSoloCount,
+        vipTable5: ticketCounts.vipTable5Count,
+        vipTable7: ticketCounts.vipTable7Count,
+        vipTable10: ticketCounts.vipTable10Count,
+      };
+
+      const totalTickets = Object.values(tickets).reduce((sum, count) => sum + count, 0);
+      console.log("Total tickets:", totalTickets);
+
+      const ticketData = {
+        eventName: "Spotlight",
         firstName: contactDetails.firstName,
         lastName: contactDetails.lastName,
         email: contactDetails.email,
         phone: contactDetails.phone,
         referralCode: contactDetails.referralCode || null,
-        tickets: {
-          earlyBird: ticketCounts.earlyBirdCount,
-          regular: ticketCounts.regularCount,
-          vipSolo: ticketCounts.vipSoloCount,
-          vipTable5: ticketCounts.vipTable5Count,
-          vipTable7: ticketCounts.vipTable7Count,
-          vipTable10: ticketCounts.vipTable10Count,
-        },
-        price: totalWithDiscount, // Initial total
-        ticketId: uuidv4(), // Generate a ticket ID on the frontend
-        paymentReference: `TEMP_REF_${Date.now()}`, // Temporary reference
-        eventName: "Spotlight", // Or dynamically set your event name
+        tickets,
+        price: totalWithDiscount,
+        ticketId: uuidv4(),
       };
+
+      console.log("Sending ticket data:", ticketData);
 
       const postResponse = await axiosInstance.post(
         "https://spotlight-znvr.onrender.com/api/tickets/purchase",
-        ticketDataToSend,
-        { timeout: 10000 }
+        ticketData
       );
+      console.log("POST Response:", postResponse.data);
 
-      console.log("Backend ticket purchase response:", postResponse.data);
-      const ticketId = postResponse.data?.ticketId;
-      const finalPriceFromBackend = postResponse.data?.totalPrice;
-      const paymentReferenceFromBackend = postResponse.data?.paymentReference;
-
-      if (ticketId) {
-        localStorage.removeItem("checkoutStep");
-        localStorage.removeItem("checkoutTimer");
-        localStorage.setItem("lastTransactionRef", paymentReferenceFromBackend || `TEMP_REF_${Date.now()}`);
-
-        if (finalPriceFromBackend === 0) {
-          // Ticket is free, navigate directly to ticket details
-          navigate(`/ticket-details/${ticketId}`);
-        } else if (typeof finalPriceFromBackend === "number" && finalPriceFromBackend > 0) {
-          // Proceed with Paystack if the price is greater than 0
-          const amountInKobo = Math.round(finalPriceFromBackend * 100);
-          const paystack = new PaystackPop();
-          paystack.newTransaction({
-            key: "pk_live_YOUR_KEY", // Replace with your actual live key
-            email: contactDetails.email,
-            amount: amountInKobo,
-            currency: "NGN",
-            reference: paymentReferenceFromBackend || `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`,
-            metadata: {
-              custom_fields: [
-                {
-                  display_name: "Customer Name",
-                  variable_name: "customer_name",
-                  value: `${contactDetails.firstName} ${contactDetails.lastName}`,
-                },
-                {
-                  display_name: "Phone Number",
-                  variable_name: "phone",
-                  value: contactDetails.phone,
-                },
-              ],
-            },
-            onSuccess: async (response) => {
-              console.log("Paystack successful:", response);
-              // You might want to update the backend with the Paystack reference here if it wasn't sent initially
-              navigate(`/ticket-details/${ticketId}`);
-            },
-            onCancel: () => {
-              setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
-              setIsProcessing(false);
-            },
-          });
-        } else if (finalPriceFromBackend <= 0) {
-          navigate(`/ticket-details/${ticketId}`); // Handle cases where totalWithDiscount might be 0 initially
-        } else {
-          setPaymentError("Invalid payment amount received from backend.");
-          setIsProcessing(false);
-        }
-      } else {
-        console.error("No ticket ID received from backend");
-        setPaymentError("Failed to retrieve ticket details.");
+      const ticketId = postResponse.data.ticketId;
+      if (!ticketId) {
+        console.error("No ticketId in response:", postResponse.data);
+        throw new Error("No ticket ID returned from server");
       }
+      console.log("Extracted ticketId:", ticketId);
+
+      const amountInKobo = Math.round(totalWithDiscount * 100);
+      console.log("Amount in kobo:", amountInKobo);
+      const paymentReference = `TICKET_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+      console.log("Paystack reference:", paymentReference);
+
+      const paystack = new PaystackPop();
+      console.log("Initializing Paystack with:", {
+        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
+        email: contactDetails.email,
+        amount: amountInKobo,
+        reference: paymentReference,
+      });
+      paystack.newTransaction({
+        key: "pk_live_9fdf47f626da3db16775f593a57baa26078d859d",
+        email: contactDetails.email,
+        amount: amountInKobo,
+        currency: "NGN",
+        reference: paymentReference,
+        metadata: {
+          ticketId,
+          custom_fields: [
+            {
+              display_name: "Customer Name",
+              variable_name: "customer_name",
+              value: `${contactDetails.firstName} ${contactDetails.lastName}`,
+            },
+            {
+              display_name: "Phone Number",
+              variable_name: "phone",
+              value: contactDetails.phone,
+            },
+          ],
+        },
+        onSuccess: (paystackResponse) => {
+          console.log("Payment successful:", paystackResponse);
+          localStorage.removeItem("checkoutStep");
+          localStorage.removeItem("checkoutTimer");
+          localStorage.setItem("lastTransactionRef", paystackResponse.reference);
+          console.log("Navigating to:", `/ticket-details/${ticketId}`);
+          navigate(`/ticket-details/${ticketId}`);
+          console.log("Navigation triggered");
+        },
+        onCancel: () => {
+          console.log("Payment cancelled");
+          setPaymentError("Payment was cancelled. Please complete your payment to secure your tickets.");
+          setIsProcessing(false);
+        },
+      });
     } catch (error) {
-      console.error("Error processing ticket purchase:", error);
-      setPaymentError(error.response?.data?.error || "An error occurred while processing your ticket.");
-    } finally {
+      console.error("Payment initialization error:", error.response?.data || error.message);
+      if (error instanceof Yup.ValidationError) {
+        console.log("Validation errors:", error.errors);
+        setPaymentError("Validation failed: " + error.errors.join(", "));
+      } else {
+        setPaymentError(error.response?.data?.error || "An error occurred during payment initialization.");
+      }
       setIsProcessing(false);
     }
   };
@@ -172,7 +191,7 @@ function PaymentHandler({ contactDetails, ticketCounts, totalWithDiscount, onBac
           </button>
           <button
             className="px-6 py-3 bg-gold text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-            onClick={processPayment} // Changed to processPayment
+            onClick={initializePayment}
             disabled={isProcessing}
           >
             {isProcessing ? "Processing..." : "Pay Now"}
